@@ -24,13 +24,7 @@ class _SettingsState extends State<Settings> {
             children: [
               SizedBox(
                 width: double.infinity,
-                child: Container(
-                    // decoration: const BoxDecoration(
-                    //   border: Border(
-                    //     top: BorderSide(width: 1.0, color: Colors.grey),
-                    //   ),
-                    // ),
-                    child: TextButton(
+                child: TextButton(
                   style: ButtonStyle(
                       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           const RoundedRectangleBorder())),
@@ -45,7 +39,7 @@ class _SettingsState extends State<Settings> {
                           style: TextStyle(fontSize: 20, color: Colors.black)),
                     ],
                   ),
-                )),
+                ),
               ),
             ],
           )),

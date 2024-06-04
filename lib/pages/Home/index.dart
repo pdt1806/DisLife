@@ -1,6 +1,7 @@
 import 'package:dislife/utils/const.dart';
 import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -12,9 +13,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Future<void> _launchUrl(Uri _url) async {
-    if (!await launchUrl(_url)) {
-      throw Exception('Could not launch $_url');
+  Future<void> _launchUrl(Uri url) async {
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
     }
   }
 
@@ -71,20 +72,23 @@ class _HomeState extends State<Home> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: discordColor,
-          title: const Row(
+          title: Row(
             children: [
-              Image(
-                image: AssetImage("assets/images/icons/square.png"),
-                width: 45,
-                height: 45,
+              SvgPicture.asset(
+                "assets/images/icons/flower.svg",
+                colorFilter:
+                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                width: 40,
+                height: 40,
               ),
-              SizedBox(width: 5),
-              Text(
+              const SizedBox(width: 5),
+              const Text(
                 'DisLife',
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -104,14 +108,7 @@ class _HomeState extends State<Home> {
                       height: 150,
                       child: Container(
                         decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image:
-                                const AssetImage('assets/images/create_bg.jpg'),
-                            colorFilter: ColorFilter.mode(
-                                Colors.black.withOpacity(0.6),
-                                BlendMode.darken),
-                            fit: BoxFit.cover,
-                          ),
+                          color: homeButtonColor1,
                           borderRadius: BorderRadius.circular(18.0),
                         ),
                         child: TextButton(
@@ -140,13 +137,7 @@ class _HomeState extends State<Home> {
                     height: 150,
                     child: Container(
                       decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image:
-                              const AssetImage('assets/images/create_bg.jpg'),
-                          colorFilter: ColorFilter.mode(
-                              Colors.black.withOpacity(0.6), BlendMode.darken),
-                          fit: BoxFit.cover,
-                        ),
+                        color: homeButtonColor2,
                         borderRadius: BorderRadius.circular(18.0),
                       ),
                       child: TextButton(
@@ -178,14 +169,7 @@ class _HomeState extends State<Home> {
                       height: 150,
                       child: Container(
                         decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image:
-                                const AssetImage('assets/images/create_bg.jpg'),
-                            colorFilter: ColorFilter.mode(
-                                Colors.black.withOpacity(0.6),
-                                BlendMode.darken),
-                            fit: BoxFit.cover,
-                          ),
+                          color: homeButtonColor3,
                           borderRadius: BorderRadius.circular(18.0),
                         ),
                         child: TextButton(
@@ -198,7 +182,7 @@ class _HomeState extends State<Home> {
                                 borderRadius: BorderRadius.circular(18.0),
                               ))),
                           onPressed: () {
-                            // Navigator.pushNamed(context, '/create');
+                            Navigator.pushNamed(context, '/view');
                           },
                           child: const Text('View current post',
                               textAlign: TextAlign.center,
@@ -214,14 +198,7 @@ class _HomeState extends State<Home> {
                       height: 150,
                       child: Container(
                         decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image:
-                                const AssetImage('assets/images/create_bg.jpg'),
-                            colorFilter: ColorFilter.mode(
-                                Colors.black.withOpacity(0.6),
-                                BlendMode.darken),
-                            fit: BoxFit.cover,
-                          ),
+                          color: homeButtonColor4,
                           borderRadius: BorderRadius.circular(18.0),
                         ),
                         child: TextButton(
@@ -265,7 +242,7 @@ class _HomeState extends State<Home> {
                   )
                 ],
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 10),
               Text(
                 'DisLife v$appVersion',
                 style: const TextStyle(color: Colors.grey, fontSize: 15),

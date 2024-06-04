@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,13 +17,11 @@ Future<bool> savingAPIEndpoint(String apiEndpoint, String apiKey) async {
   try {
     http.Response response = await verifyEndpoint(apiEndpoint, apiKey);
     bool isValid = response.statusCode == 200;
-    String imgbbKey = jsonDecode(response.body)['imgbb_key'];
 
     if (isValid) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('apiEndpoint', apiEndpoint);
       prefs.setString('apiKey', apiKey);
-      prefs.setString('imgbbKey', imgbbKey);
     }
 
     return isValid;
@@ -59,27 +56,6 @@ Future<bool> clearPost() async {
   }
 }
 
-// ------------------------------------------
-// Create post
-
-Future<http.Response> uploadImage(File image) async {
-  final bytes = image.readAsBytesSync();
-  final base64Image = base64Encode(bytes);
-
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  final Map<String, String> payload = {
-    'key': prefs.getString('imgbbKey') ?? '',
-    'image': base64Image,
-    'expiration': '43200', // 12 hours in seconds
-  };
-
-  return http.post(
-    Uri.parse('https://api.imgbb.com/1/upload'),
-    body: payload,
-  );
-}
-
 Future<http.Response> createPostHTTP(Map<String, dynamic> data) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String apiEndpoint = prefs.getString('apiEndpoint') ?? '';
@@ -95,23 +71,8 @@ Future<http.Response> createPostHTTP(Map<String, dynamic> data) async {
   );
 }
 
-Future<bool> createPost(File? image, Map<String, dynamic> data) async {
+Future<bool> createPost(Map<String, dynamic> data) async {
   try {
-    if (image == null) {
-      return false;
-    }
-
-    http.Response uploadImageResponse = await uploadImage(image);
-    String imageUrl = uploadImageResponse.statusCode == 200
-        ? jsonDecode(uploadImageResponse.body)['data']['url']
-        : '';
-
-    if (uploadImageResponse.statusCode != 200 || imageUrl.isEmpty) {
-      return false;
-    }
-
-    data['image'] = imageUrl;
-
     bool isValid = await createPostHTTP(data)
         .then((response) => response.statusCode == 200)
         .catchError((error) => false);
@@ -119,5 +80,33 @@ Future<bool> createPost(File? image, Map<String, dynamic> data) async {
     return isValid;
   } catch (e) {
     return false;
+  }
+}
+
+// ------------------------------------------
+// Fetch post
+
+Future<http.Response> fetchPostHTTP() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String apiEndpoint = prefs.getString('apiEndpoint') ?? '';
+  String apiKey = prefs.getString('apiKey') ?? '';
+
+  return http.get(
+    Uri.parse('$apiEndpoint/fetch'),
+    headers: <String, String>{'Authorization': apiKey},
+  );
+}
+
+Future<Map<String, dynamic>> fetchPost() async {
+  try {
+    Map<String, dynamic> post = await fetchPostHTTP()
+        .then((response) => jsonDecode(response.body))
+        .catchError((error) => {});
+
+    return post;
+  } catch (e) {
+    return {
+      "message": "Failed to fetch post",
+    };
   }
 }

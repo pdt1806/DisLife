@@ -18,6 +18,8 @@ dependencies:
   shared_preferences: ^2.2.3
   url_launcher: ^6.3.0
   package_info_plus: ^8.0.0
+  flutter_svg: ^2.0.10+1
+  lehttp_overrides: ^1.0.3
 
 dev_dependencies:
   flutter_test:
@@ -28,9 +30,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/create_bg.jpg
     - assets/images/icons/curved.png
     - assets/images/icons/square.png
+    - assets/images/icons/flower.svg
 
 flutter_icons:
   android: true

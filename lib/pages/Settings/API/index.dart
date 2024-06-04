@@ -34,12 +34,14 @@ class _SettingsAPIState extends State<SettingsAPI> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: discordColor,
-          title: const Text('Settings', style: TextStyle(color: Colors.white)),
+          title:
+              const Text('API Endpoint', style: TextStyle(color: Colors.white)),
         ),
         body: Container(
           margin: const EdgeInsets.all(15),
@@ -95,13 +97,14 @@ class _SettingsAPIState extends State<SettingsAPI> {
                                 ),
                                 backgroundColor: Colors.green));
                       } else {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                                content: Text(
-                                  "Cannot connect to the API Endpoint.",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                backgroundColor: Colors.red));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                "Cannot connect to the API Endpoint.",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              backgroundColor: Colors.red),
+                        );
                       }
                     });
                     Navigator.pop(context);
