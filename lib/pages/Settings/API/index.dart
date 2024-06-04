@@ -1,5 +1,7 @@
 import 'package:dislife/utils/const.dart';
+import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsAPI extends StatefulWidget {
   const SettingsAPI({super.key});
@@ -9,7 +11,29 @@ class SettingsAPI extends StatefulWidget {
 }
 
 class _SettingsAPIState extends State<SettingsAPI> {
+  TextEditingController apiEndpointController = TextEditingController();
+  TextEditingController apiKeyController = TextEditingController();
+  bool passwordVisible = false;
+
   @override
+  void initState() {
+    loadData();
+    super.initState();
+  }
+
+  void loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    apiEndpointController.text = prefs.getString('apiEndpoint') ?? '';
+    apiKeyController.text = prefs.getString('apiKey') ?? '';
+    passwordVisible = false;
+  }
+
+  void togglePasswordVisibility() {
+    setState(() {
+      passwordVisible = !passwordVisible;
+    });
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -23,11 +47,35 @@ class _SettingsAPIState extends State<SettingsAPI> {
               child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const TextField(
-                decoration: InputDecoration(
+              TextFormField(
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'API Endpoint',
+                  prefixIcon: Icon(Icons.link),
                 ),
+                controller: apiEndpointController,
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                obscureText: !passwordVisible,
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'API Key',
+                  prefixIcon: const Icon(Icons.key),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      togglePasswordVisibility();
+                    },
+                  ),
+                ),
+                controller: apiKeyController,
               ),
               const SizedBox(height: 15),
               SizedBox(
@@ -35,13 +83,27 @@ class _SettingsAPIState extends State<SettingsAPI> {
                 height: 50,
                 child: TextButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text(
-                        "API Endpoint saved!",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      backgroundColor: Colors.green,
-                    ));
+                    String apiEndpoint = apiEndpointController.text;
+                    String apiKey = apiKeyController.text;
+                    savingAPIEndpoint(apiEndpoint, apiKey).then((isValid) {
+                      if (isValid) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                                content: Text(
+                                  "API Endpoint saved successfully!",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Colors.green));
+                      } else {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                                content: Text(
+                                  "Cannot connect to the API Endpoint.",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Colors.red));
+                      }
+                    });
                     Navigator.pop(context);
                   },
                   style: ButtonStyle(

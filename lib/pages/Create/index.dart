@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dislife/utils/const.dart';
+import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,6 +19,16 @@ class _CreateNewPostState extends State<CreateNewPost> {
   List dropdownOptions = ['Current location', 'Custom'];
   String dropdownValue = 'Current location';
   File? image;
+
+  TextEditingController description1Controller = TextEditingController();
+  TextEditingController description2Controller = TextEditingController();
+  TextEditingController buttonLabelController = TextEditingController();
+  TextEditingController buttonURLController = TextEditingController();
+
+  bool description1Invalid = false;
+  bool description2Invalid = false;
+  bool buttonLabelInvalid = false;
+  bool buttonURLInvalid = false;
 
   Future pickImage() async {
     try {
@@ -45,6 +56,12 @@ class _CreateNewPostState extends State<CreateNewPost> {
     setState(() {
       advancedInfo = !advancedInfo;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    pickImage();
   }
 
   @override
@@ -96,11 +113,15 @@ class _CreateNewPostState extends State<CreateNewPost> {
                 ),
               ),
               const SizedBox(height: 15),
-              const TextField(
+              TextFormField(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   labelText: 'Message',
+                  errorText: description1Invalid
+                      ? "This field requires more than 2 characters."
+                      : null,
                 ),
+                controller: description1Controller,
               ),
               const SizedBox(height: 15),
               Row(
@@ -111,7 +132,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       onChanged: (_) {
                         toggleAdvancedInfo();
                       }),
-                  const Text("Advanced Information",
+                  const Text("Advanced information",
                       style: TextStyle(fontSize: 18)),
                 ],
               ),
@@ -119,11 +140,15 @@ class _CreateNewPostState extends State<CreateNewPost> {
                 Column(
                   children: [
                     const SizedBox(height: 15),
-                    const TextField(
+                    TextFormField(
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         labelText: 'Message #2',
+                        errorText: description2Invalid
+                            ? "This field requires more than 2 characters."
+                            : null,
                       ),
+                      controller: description2Controller,
                     ),
                     const SizedBox(height: 15),
                     Row(
@@ -133,7 +158,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                             style: TextStyle(fontSize: 18)),
                         Switch(
                           activeColor: discordColor,
-                          inactiveTrackColor: Colors.white,
+                          inactiveTrackColor: Colors.transparent,
                           value: elaspseTime,
                           onChanged: (_) {
                             toggleElapseTime();
@@ -144,12 +169,16 @@ class _CreateNewPostState extends State<CreateNewPost> {
                     const SizedBox(height: 15),
                     Row(
                       children: [
-                        const Expanded(
-                          child: TextField(
+                        Expanded(
+                          child: TextFormField(
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               labelText: 'Button label',
+                              errorText: buttonLabelInvalid
+                                  ? "This field should not be empty and requires less than 32 characters."
+                                  : null,
                             ),
+                            controller: buttonLabelController,
                           ),
                         ),
                         const SizedBox(width: 15),
@@ -172,14 +201,15 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       ],
                     ),
                     if (dropdownValue == 'Custom')
-                      const Column(
+                      Column(
                         children: [
-                          SizedBox(height: 15),
-                          TextField(
-                            decoration: InputDecoration(
+                          const SizedBox(height: 15),
+                          TextFormField(
+                            decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               labelText: 'Custom URL',
                             ),
+                            controller: buttonURLController,
                           ),
                         ],
                       )
@@ -191,15 +221,112 @@ class _CreateNewPostState extends State<CreateNewPost> {
                 height: 50,
                 child: TextButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text(
-                        "Post created!",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      backgroundColor: Colors.green,
-                    ));
-                    Navigator.pop(context);
-                    // then show preview page
+                    Map<String, dynamic> data;
+
+                    if (!advancedInfo) {
+                      if (image == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select an image.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                      if (description1Controller.text.isEmpty ||
+                          description1Controller.text.length < 2) {
+                        setState(() {
+                          description1Invalid = true;
+                        });
+                        return;
+                      }
+                      data = {
+                        'description1': description1Controller.text,
+                      };
+                    } else {
+                      if (image == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please take an image.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                      if (description1Controller.text.isEmpty ||
+                          description1Controller.text.length < 2) {
+                        setState(() {
+                          description1Invalid = true;
+                        });
+                        return;
+                      }
+                      if (description2Controller.text.isNotEmpty &&
+                          description2Controller.text.length < 2) {
+                        setState(() {
+                          description2Invalid = true;
+                        });
+                        return;
+                      }
+                      if (buttonLabelController.text.isNotEmpty &&
+                          buttonLabelController.text.length > 32) {
+                        setState(() {
+                          buttonLabelInvalid = true;
+                        });
+                        return;
+                      }
+                      if (dropdownValue == 'Custom' &&
+                          buttonURLController.text.isNotEmpty) {
+                        if (buttonURLController.text.isNotEmpty &&
+                            !Uri.parse(buttonURLController.text).isAbsolute) {
+                          setState(() {
+                            buttonURLInvalid = true;
+                          });
+                          return;
+                        }
+                      }
+                      data = {
+                        'description1': description1Controller.text,
+                        'description2': description2Controller.text.isNotEmpty
+                            ? description2Controller.text
+                            : '',
+                        'timestamp': elaspseTime,
+                        'button1': buttonLabelController.text.isNotEmpty
+                            ? {
+                                'label': buttonLabelController.text.isNotEmpty
+                                    ? buttonLabelController.text
+                                    : '',
+                                'url': dropdownValue == 'Custom'
+                                    ? buttonURLController.text.isNotEmpty
+                                        ? buttonURLController.text
+                                        : ''
+                                    : ''
+                              }
+                            : null
+                      };
+                    }
+
+                    createPost(image, data).then(
+                      (value) {
+                        if (value) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Post created.'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Failed to create post.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                        Navigator.pop(context);
+                      },
+                    );
+
+                    // Navigator.pushNamed(context, '/preview');
                   },
                   style: ButtonStyle(
                       backgroundColor:
