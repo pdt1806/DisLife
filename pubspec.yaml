@@ -1,8 +1,8 @@
 name: dislife
-description: "A new Flutter project."
+description: "Transform your Discord Rich Presence into a Locket-like experience: instantly share your moments with friends and peers!"
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ">=3.4.1 <4.0.0"

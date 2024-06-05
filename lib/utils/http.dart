@@ -15,6 +15,10 @@ Future<http.Response> verifyEndpoint(String apiEndpoint, String apiKey) {
 
 Future<bool> savingAPIEndpoint(String apiEndpoint, String apiKey) async {
   try {
+    if (apiEndpoint.endsWith('/')) {
+      apiEndpoint = apiEndpoint.substring(0, apiEndpoint.length - 1);
+    }
+
     http.Response response = await verifyEndpoint(apiEndpoint, apiKey);
     bool isValid = response.statusCode == 200;
 

@@ -28,6 +28,8 @@ class _CreateNewPostState extends State<CreateNewPost> {
   bool description1Invalid = false;
   bool description2Invalid = false;
 
+  bool uploadingPost = false;
+
   Future<bool> pickImage() async {
     try {
       final pickedFile = await ImagePicker().pickImage(
@@ -75,6 +77,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
 
     return Scaffold(
         appBar: AppBar(
+          titleSpacing: 0,
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: discordColor,
           title: const Text('Create new post',
@@ -235,13 +238,13 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       return;
                     }
 
+                    setState(() {
+                      description1Invalid =
+                          description2Controller.text.isNotEmpty &&
+                              description2Controller.text.length < 2;
+                    });
                     if (description2Controller.text.isNotEmpty &&
-                        description2Controller.text.length < 2) {
-                      setState(() {
-                        description1Invalid = true;
-                      });
-                      return;
-                    }
+                        description2Controller.text.length < 2) return;
 
                     final bytes = image!.readAsBytesSync();
                     final base64Image = base64Encode(bytes);
@@ -253,19 +256,27 @@ class _CreateNewPostState extends State<CreateNewPost> {
                     };
 
                     if (advancedInfo) {
+                      setState(() {
+                        description2Invalid =
+                            description2Controller.text.isNotEmpty &&
+                                description2Controller.text.length < 2;
+                      });
                       if (description2Controller.text.isNotEmpty &&
-                          description2Controller.text.length < 2) {
-                        setState(() {
-                          description2Invalid = true;
-                        });
-                        return;
-                      }
+                          description2Controller.text.length < 2) return;
+
                       data['description2'] = description2Controller.text;
                       data['timestamp'] = elaspseTime;
                     }
 
+                    setState(() {
+                      uploadingPost = true;
+                    });
+
                     createPost(data).then(
                       (value) {
+                        setState(() {
+                          uploadingPost = false;
+                        });
                         if (value) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -282,10 +293,9 @@ class _CreateNewPostState extends State<CreateNewPost> {
                           );
                         }
                         Navigator.pop(context);
+                        Navigator.pushNamed(context, '/view');
                       },
                     );
-
-                    // Navigator.pushNamed(context, '/preview');
                   },
                   style: ButtonStyle(
                       backgroundColor:
@@ -294,8 +304,12 @@ class _CreateNewPostState extends State<CreateNewPost> {
                           RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18.0),
                       ))),
-                  child: const Text('Create post',
-                      style: TextStyle(fontSize: 20, color: Colors.white)),
+                  child: uploadingPost
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text('Create post',
+                          style: TextStyle(fontSize: 20, color: Colors.white)),
                 ),
               ),
             ],

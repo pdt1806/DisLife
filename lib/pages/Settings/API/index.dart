@@ -15,6 +15,9 @@ class _SettingsAPIState extends State<SettingsAPI> {
   TextEditingController apiKeyController = TextEditingController();
   bool passwordVisible = false;
 
+  bool apiEndpointInvalid = false;
+  bool apiKeyInvalid = false;
+
   @override
   void initState() {
     loadData();
@@ -38,6 +41,7 @@ class _SettingsAPIState extends State<SettingsAPI> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          titleSpacing: 0,
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: discordColor,
           title:
@@ -52,10 +56,11 @@ class _SettingsAPIState extends State<SettingsAPI> {
               TextFormField(
                 enableSuggestions: false,
                 autocorrect: false,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
                   labelText: 'API Endpoint',
-                  prefixIcon: Icon(Icons.link),
+                  prefixIcon: const Icon(Icons.link),
+                  errorText: apiEndpointInvalid ? 'Invalid API Endpoint' : null,
                 ),
                 controller: apiEndpointController,
               ),
@@ -76,6 +81,7 @@ class _SettingsAPIState extends State<SettingsAPI> {
                       togglePasswordVisibility();
                     },
                   ),
+                  errorText: apiKeyInvalid ? 'API Key cannot be empty' : null,
                 ),
                 controller: apiKeyController,
               ),
@@ -87,6 +93,19 @@ class _SettingsAPIState extends State<SettingsAPI> {
                   onPressed: () {
                     String apiEndpoint = apiEndpointController.text;
                     String apiKey = apiKeyController.text;
+
+                    setState(() {
+                      apiEndpointInvalid = apiEndpoint.isEmpty ||
+                          !Uri.parse(apiEndpoint).isAbsolute;
+                    });
+                    if (apiEndpoint.isEmpty ||
+                        !Uri.parse(apiEndpoint).isAbsolute) return;
+
+                    setState(() {
+                      apiKeyInvalid = apiKey.isEmpty;
+                    });
+                    if (apiKey.isEmpty) return;
+
                     savingAPIEndpoint(apiEndpoint, apiKey).then((isValid) {
                       if (isValid) {
                         ScaffoldMessenger.of(context)
@@ -106,8 +125,8 @@ class _SettingsAPIState extends State<SettingsAPI> {
                               backgroundColor: Colors.red),
                         );
                       }
+                      Navigator.pop(context);
                     });
-                    Navigator.pop(context);
                   },
                   style: ButtonStyle(
                       backgroundColor:

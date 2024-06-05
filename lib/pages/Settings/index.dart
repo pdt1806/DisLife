@@ -13,6 +13,7 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          titleSpacing: 0,
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: discordColor,
           title: const Text('Settings', style: TextStyle(color: Colors.white)),

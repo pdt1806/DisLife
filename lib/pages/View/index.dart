@@ -34,6 +34,7 @@ class _ViewPostState extends State<ViewPost> {
 
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: discordColor,
         title: const Text('View current post',
