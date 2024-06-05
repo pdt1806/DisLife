@@ -5,12 +5,15 @@ import 'package:dislife/pages/Home/index.dart';
 import 'package:dislife/pages/Settings/API/index.dart';
 import 'package:dislife/pages/Settings/index.dart';
 import 'package:dislife/pages/View/index.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lehttp_overrides/lehttp_overrides.dart';
 
 void main() {
-  if (Platform.isAndroid) {
-    HttpOverrides.global = LEHttpOverrides(allowExpiredDSTX3: true);
+  if (!kIsWeb) {
+    if (Platform.isAndroid) {
+      HttpOverrides.global = LEHttpOverrides(allowExpiredDSTX3: true);
+    }
   }
   runApp(const MyApp());
 }

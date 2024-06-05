@@ -30,102 +30,107 @@ class _ViewPostState extends State<ViewPost> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    double width = MediaQuery.of(context).size.width > 600
+        ? 600
+        : MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: discordColor,
-        title: const Text('View current post',
-            style: TextStyle(color: Colors.white)),
-      ),
-      body: Container(
-        margin: const EdgeInsets.all(15),
-        child: SingleChildScrollView(
-          child: post.isNotEmpty
-              ? post["data"] != null
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Created on ${post["data"]["created"]}",
-                            style: const TextStyle(fontSize: 15)),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          height: width - 30,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(post["data"]["image"]),
-                                fit: BoxFit.cover,
-                              ),
-                              borderRadius: BorderRadius.circular(18.0),
-                            ),
-                            child: null,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        if (post["data"]["description1"] != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Text(
-                              post["data"]["description1"],
-                              style: const TextStyle(
-                                fontSize: 20,
+        appBar: AppBar(
+          titleSpacing: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+          backgroundColor: discordColor,
+          title: const Text('View current post',
+              style: TextStyle(color: Colors.white)),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            alignment: Alignment.topCenter,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 600),
+              margin: const EdgeInsets.all(15),
+              child: post.isNotEmpty
+                  ? post["data"] != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Created on ${post["data"]["created"]}",
+                                style: const TextStyle(fontSize: 15)),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: double.infinity,
+                              height: width - 30,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: NetworkImage(post["data"]["image"]),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ),
+                                child: null,
                               ),
                             ),
-                          ),
-                        if (post["data"]["description2"] != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Text(
-                              post["data"]["description2"],
-                              style: const TextStyle(
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                        if (post["data"]["timestamp"] != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: CountUpTimer(
-                              startTime:
-                                  DateTime.parse(post["data"]["timestamp"]),
-                            ),
-                          ),
-                        if (post["data"]["viewFullImage"])
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Row(
-                              children: [
-                                SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: Checkbox(
-                                    value: true,
-                                    onChanged: (_) {},
-                                    splashRadius: 0.0,
+                            const SizedBox(height: 5),
+                            if (post["data"]["description1"] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  post["data"]["description1"],
+                                  style: const TextStyle(
+                                    fontSize: 20,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                const Text('Allow viewing full image',
-                                    style: TextStyle(fontSize: 20)),
-                              ],
-                            ),
-                          ),
-                      ],
-                    )
+                              ),
+                            if (post["data"]["description2"] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  post["data"]["description2"],
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            if (post["data"]["timestamp"] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: CountUpTimer(
+                                  startTime:
+                                      DateTime.parse(post["data"]["timestamp"]),
+                                ),
+                              ),
+                            if (post["data"]["viewFullImage"])
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: Checkbox(
+                                        value: true,
+                                        onChanged: (_) {},
+                                        splashRadius: 0.0,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Text('Allow viewing full image',
+                                        style: TextStyle(fontSize: 20)),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        )
+                      : const Center(
+                          child: Text('No current post.',
+                              style: TextStyle(fontSize: 20)),
+                        )
                   : const Center(
-                      child: Text('No current post.',
-                          style: TextStyle(fontSize: 20)),
-                    )
-              : const Center(
-                  child: CircularProgressIndicator(),
-                ),
-        ),
-      ),
-    );
+                      child: CircularProgressIndicator(),
+                    ),
+            ),
+          ),
+        ));
   }
 }
 

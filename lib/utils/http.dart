@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ------------------------------------------
 // Verify endpoint
 
-Future<http.Response> verifyEndpoint(String apiEndpoint, String apiKey) {
-  return http.get(
+Future<http.Response> verifyEndpoint(String apiEndpoint, String apiKey) async {
+  return await http.get(
     Uri.parse('$apiEndpoint/verify'),
     headers: <String, String>{'Authorization': apiKey},
   );
@@ -37,8 +37,8 @@ Future<bool> savingAPIEndpoint(String apiEndpoint, String apiKey) async {
 // ------------------------------------------
 // Clear post
 
-Future<http.Response> clearPostHTTP(String apiEndpoint, String apiKey) {
-  return http.get(
+Future<http.Response> clearPostHTTP(String apiEndpoint, String apiKey) async {
+  return await http.get(
     Uri.parse('$apiEndpoint/clear'),
     headers: <String, String>{'Authorization': apiKey},
   );
@@ -60,12 +60,15 @@ Future<bool> clearPost() async {
   }
 }
 
+// ------------------------------------------
+// Create post
+
 Future<http.Response> createPostHTTP(Map<String, dynamic> data) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String apiEndpoint = prefs.getString('apiEndpoint') ?? '';
   String apiKey = prefs.getString('apiKey') ?? '';
 
-  return http.post(
+  return await http.post(
     Uri.parse('$apiEndpoint/post'),
     headers: <String, String>{
       'Authorization': apiKey,
@@ -95,7 +98,7 @@ Future<http.Response> fetchPostHTTP() async {
   String apiEndpoint = prefs.getString('apiEndpoint') ?? '';
   String apiKey = prefs.getString('apiKey') ?? '';
 
-  return http.get(
+  return await http.get(
     Uri.parse('$apiEndpoint/fetch'),
     headers: <String, String>{'Authorization': apiKey},
   );

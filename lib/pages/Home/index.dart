@@ -96,159 +96,166 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        body: Container(
-          margin: const EdgeInsets.all(15),
-          child: SingleChildScrollView(
-              child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 150,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: homeButtonColor1,
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        child: TextButton(
-                          style: ButtonStyle(
-                              overlayColor: WidgetStateProperty.all<Color>(
-                                  Colors.transparent),
-                              shape: WidgetStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
+        body: SingleChildScrollView(
+          child: Container(
+            alignment: Alignment.topCenter,
+            child: Container(
+                constraints: const BoxConstraints(maxWidth: 600),
+                margin: const EdgeInsets.all(15),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 150,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: homeButtonColors[0],
                                 borderRadius: BorderRadius.circular(18.0),
-                              ))),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/create');
-                          },
-                          child: const Text('Create new post',
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.white)),
+                              ),
+                              child: TextButton(
+                                style: ButtonStyle(
+                                    overlayColor:
+                                        WidgetStateProperty.all<Color>(
+                                            Colors.transparent),
+                                    shape: WidgetStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                    ))),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/create');
+                                },
+                                child: const Text('Create new post',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 20, color: Colors.white)),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                      child: SizedBox(
-                    height: 150,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: homeButtonColor2,
-                        borderRadius: BorderRadius.circular(18.0),
-                      ),
-                      child: TextButton(
-                        style: ButtonStyle(
-                            overlayColor: WidgetStateProperty.all<Color>(
-                                Colors.transparent),
-                            shape:
-                                WidgetStateProperty.all<RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
+                        const SizedBox(width: 15),
+                        Expanded(
+                            child: SizedBox(
+                          height: 150,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: homeButtonColors[1],
                               borderRadius: BorderRadius.circular(18.0),
-                            ))),
-                        onPressed: () {
-                          clearPostAlertDialog(context);
-                        },
-                        child: const Text('Clear current post',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(fontSize: 20, color: Colors.white)),
-                      ),
+                            ),
+                            child: TextButton(
+                              style: ButtonStyle(
+                                  overlayColor: WidgetStateProperty.all<Color>(
+                                      Colors.transparent),
+                                  shape: WidgetStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18.0),
+                                  ))),
+                              onPressed: () {
+                                clearPostAlertDialog(context);
+                              },
+                              child: const Text('Clear current post',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 20, color: Colors.white)),
+                            ),
+                          ),
+                        ))
+                      ],
                     ),
-                  ))
-                ],
-              ),
-              const SizedBox(height: 15),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 150,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: homeButtonColor3,
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        child: TextButton(
-                          style: ButtonStyle(
-                              overlayColor: WidgetStateProperty.all<Color>(
-                                  Colors.transparent),
-                              shape: WidgetStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 150,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: homeButtonColors[2],
                                 borderRadius: BorderRadius.circular(18.0),
-                              ))),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/view');
-                          },
-                          child: const Text('View current post',
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.white)),
+                              ),
+                              child: TextButton(
+                                style: ButtonStyle(
+                                    overlayColor:
+                                        WidgetStateProperty.all<Color>(
+                                            Colors.transparent),
+                                    shape: WidgetStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                    ))),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/view');
+                                },
+                                child: const Text('View current post',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 20, color: Colors.white)),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: SizedBox(
-                      height: 150,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: homeButtonColor4,
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        child: TextButton(
-                          style: ButtonStyle(
-                              overlayColor: WidgetStateProperty.all<Color>(
-                                  Colors.transparent),
-                              shape: WidgetStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: SizedBox(
+                            height: 150,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: homeButtonColors[3],
                                 borderRadius: BorderRadius.circular(18.0),
-                              ))),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/settings');
-                          },
-                          child: const Text('Settings',
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(fontSize: 20, color: Colors.white)),
+                              ),
+                              child: TextButton(
+                                style: ButtonStyle(
+                                    overlayColor:
+                                        WidgetStateProperty.all<Color>(
+                                            Colors.transparent),
+                                    shape: WidgetStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                    ))),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/settings');
+                                },
+                                child: const Text('Settings',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 20, color: Colors.white)),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Made with ❤️ by ',
+                          style: TextStyle(color: Colors.grey, fontSize: 15),
                         ),
-                      ),
+                        GestureDetector(
+                          child: const Text(
+                            'pdt1806',
+                            style: TextStyle(color: discordColor, fontSize: 15),
+                          ),
+                          onTap: () {
+                            _launchUrl(Uri.parse('https://github.com/pdt1806'));
+                          },
+                        )
+                      ],
                     ),
-                  )
-                ],
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Made with ❤️ by ',
-                    style: TextStyle(color: Colors.grey, fontSize: 15),
-                  ),
-                  GestureDetector(
-                    child: const Text(
-                      'pdt1806',
-                      style: TextStyle(color: discordColor, fontSize: 15),
+                    const SizedBox(height: 10),
+                    Text(
+                      'DisLife v$appVersion',
+                      style: const TextStyle(color: Colors.grey, fontSize: 15),
                     ),
-                    onTap: () {
-                      _launchUrl(Uri.parse('https://github.com/pdt1806'));
-                    },
-                  )
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'DisLife v$appVersion',
-                style: const TextStyle(color: Colors.grey, fontSize: 15),
-              ),
-            ],
-          )),
+                  ],
+                )),
+          ),
         ));
   }
 }
