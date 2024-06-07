@@ -4,17 +4,21 @@ import 'package:dislife/utils/const.dart';
 import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateNewPost extends StatefulWidget {
-  const CreateNewPost({super.key});
+  final void Function(int) changePage;
+
+  const CreateNewPost({super.key, required this.changePage});
 
   @override
   State<CreateNewPost> createState() => _CreateNewPostState();
 }
 
 class _CreateNewPostState extends State<CreateNewPost> {
-  bool elaspseTime = false,
+  bool timestamp = false,
       advancedInfo = false,
       viewFullImage = true,
       description1Invalid = false,
@@ -26,7 +30,21 @@ class _CreateNewPostState extends State<CreateNewPost> {
   TextEditingController description1Controller = TextEditingController(),
       description2Controller = TextEditingController();
 
-  Future displayBottomSheet(BuildContext context) {
+  void listTileTakeImage(ImageSource source) {
+    takeImage(source).then((isValid) {
+      if (!isValid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to select image.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      Navigator.pop(context);
+    });
+  }
+
+  Future<void> displayBottomSheet(BuildContext context) async {
     return showModalBottomSheet(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -42,26 +60,14 @@ class _CreateNewPostState extends State<CreateNewPost> {
             leading: const Icon(Icons.camera_alt),
             title: const Text('Take a photo'),
             onTap: () {
-              takeImage(ImageSource.camera).then((isValid) {
-                if (!isValid) {
-                  Navigator.pop(context, false);
-                } else {
-                  Navigator.pop(context, true);
-                }
-              });
+              listTileTakeImage(ImageSource.camera);
             },
           ),
           ListTile(
             leading: const Icon(Icons.photo_library),
             title: const Text('Choose from gallery'),
             onTap: () {
-              takeImage(ImageSource.gallery).then((isValid) {
-                if (!isValid) {
-                  Navigator.pop(context, false);
-                } else {
-                  Navigator.pop(context, true);
-                }
-              });
+              listTileTakeImage(ImageSource.gallery);
             },
           ),
         ],
@@ -77,36 +83,67 @@ class _CreateNewPostState extends State<CreateNewPost> {
 
       final bytes = await pickedFile.readAsBytes();
 
-      setState(() {
-        image = bytes;
-      });
+      if (mounted) {
+        setState(() {
+          image = bytes;
+        });
+      }
       return true;
     } on PlatformException catch (_) {
       return null;
     }
   }
 
-  void toggleElapseTime() {
-    setState(() {
-      elaspseTime = !elaspseTime;
-    });
+  void toggleTimestamp() {
+    if (mounted) {
+      setState(() {
+        timestamp = !timestamp;
+      });
+    }
   }
 
   void toggleViewFullImage() {
-    setState(() {
-      viewFullImage = !viewFullImage;
-    });
+    if (mounted) {
+      setState(() {
+        viewFullImage = !viewFullImage;
+      });
+    }
   }
 
   void toggleAdvancedInfo() {
-    setState(() {
-      advancedInfo = !advancedInfo;
-    });
+    if (mounted) {
+      setState(() {
+        advancedInfo = !advancedInfo;
+      });
+    }
   }
 
   @override
   void initState() {
+    loadData();
     super.initState();
+  }
+
+  void loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        description1Controller.text =
+            prefs.getString('description1_default') ?? '';
+        description2Controller.text =
+            prefs.getString('description2_default') ?? '';
+        advancedInfo = prefs.getBool('advancedInfo_default') ?? false;
+        timestamp = prefs.getBool('timestamp_default') ?? false;
+        viewFullImage = prefs.getBool('viewFullImage_default') ?? true;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    description1Controller.dispose();
+    description2Controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -117,11 +154,24 @@ class _CreateNewPostState extends State<CreateNewPost> {
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: discordColor,
-        title: const Text('Create new post',
-            style: TextStyle(color: Colors.white)),
+        title: Row(
+          children: [
+            SvgPicture.asset(
+              "assets/images/icons/flower.svg",
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              width: 40,
+              height: 40,
+            ),
+            const SizedBox(width: 5),
+            const Text(
+              'DisLife',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            )
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -155,20 +205,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                               borderRadius: BorderRadius.circular(18.0),
                             ))),
                         onPressed: () {
-                          displayBottomSheet(context).then(
-                            (isValid) {
-                              if (isValid == null) return;
-
-                              if (!isValid) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Failed to select image.'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            },
-                          );
+                          displayBottomSheet(context);
                         },
                         icon: image == null
                             ? const Icon(Icons.add_a_photo,
@@ -236,14 +273,14 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Enable elapse time",
+                          const Text("Enable elapsed time",
                               style: TextStyle(fontSize: 18)),
                           Switch(
                             activeColor: discordColor,
                             inactiveTrackColor: Colors.transparent,
-                            value: elaspseTime,
+                            value: timestamp,
                             onChanged: (_) {
-                              toggleElapseTime();
+                              toggleTimestamp();
                             },
                           )
                         ],
@@ -284,13 +321,15 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         return;
                       }
 
-                      setState(() {
-                        description1Invalid =
-                            description2Controller.text.isNotEmpty &&
-                                description2Controller.text.length < 2;
-                      });
-                      if (description2Controller.text.isNotEmpty &&
-                          description2Controller.text.length < 2) return;
+                      if (mounted) {
+                        setState(() {
+                          description1Invalid =
+                              description1Controller.text.isNotEmpty &&
+                                  description1Controller.text.length < 2;
+                        });
+                      }
+                      if (description1Controller.text.isNotEmpty &&
+                          description1Controller.text.length < 2) return;
 
                       final base64Image = base64Encode(image!);
 
@@ -301,27 +340,33 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       };
 
                       if (advancedInfo) {
-                        setState(() {
-                          description2Invalid =
-                              description2Controller.text.isNotEmpty &&
-                                  description2Controller.text.length < 2;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            description2Invalid =
+                                description2Controller.text.isNotEmpty &&
+                                    description2Controller.text.length < 2;
+                          });
+                        }
                         if (description2Controller.text.isNotEmpty &&
                             description2Controller.text.length < 2) return;
 
                         data['description2'] = description2Controller.text;
-                        data['timestamp'] = elaspseTime;
+                        data['timestamp'] = timestamp;
                       }
 
-                      setState(() {
-                        uploadingPost = true;
-                      });
+                      if (mounted) {
+                        setState(() {
+                          uploadingPost = true;
+                        });
+                      }
 
                       createPost(data).then(
                         (value) {
-                          setState(() {
-                            uploadingPost = false;
-                          });
+                          if (mounted) {
+                            setState(() {
+                              uploadingPost = false;
+                            });
+                          }
                           if (value) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -337,8 +382,10 @@ class _CreateNewPostState extends State<CreateNewPost> {
                               ),
                             );
                           }
-                          Navigator.pop(context);
-                          if (value) Navigator.pushNamed(context, '/view');
+
+                          if (value) {
+                            widget.changePage(0);
+                          }
                         },
                       );
                     },

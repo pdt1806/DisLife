@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dislife/utils/const.dart';
+import 'package:dislife/utils/fns.dart';
 import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
 
@@ -21,11 +22,64 @@ class _ViewPostState extends State<ViewPost> {
   }
 
   void loadData() {
-    fetchPost().then((value) {
+    if (mounted) {
       setState(() {
-        post = value;
+        post = {};
       });
+    }
+    fetchPost().then((value) {
+      if (mounted) {
+        setState(() {
+          post = value;
+        });
+      }
     });
+  }
+
+  clearPostAlertDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: const Text("Clear current post"),
+      content: const Text("Are you sure you want to clear the current post?"),
+      actions: [
+        TextButton(
+          child: const Text("Clear"),
+          onPressed: () {
+            clearPost().then(
+              (value) {
+                if (value) {
+                  if (mounted) {
+                    setState(() {
+                      post = {"data": null};
+                    });
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Post cleared.'),
+                      backgroundColor: Colors.green));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Failed to clear post.'),
+                      backgroundColor: Colors.red));
+                }
+              },
+            );
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: const Text("Cancel", style: TextStyle(color: Colors.red)),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
@@ -35,102 +89,166 @@ class _ViewPostState extends State<ViewPost> {
         : MediaQuery.of(context).size.width;
 
     return Scaffold(
-        appBar: AppBar(
-          titleSpacing: 0,
-          iconTheme: const IconThemeData(color: Colors.white),
-          backgroundColor: discordColor,
-          title: const Text('View current post',
-              style: TextStyle(color: Colors.white)),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            alignment: Alignment.topCenter,
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 600),
-              margin: const EdgeInsets.all(15),
-              child: post.isNotEmpty
-                  ? post["data"] != null
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Created on ${post["data"]["created"]}",
-                                style: const TextStyle(fontSize: 15)),
-                            const SizedBox(height: 10),
-                            SizedBox(
-                              width: double.infinity,
-                              height: width - 30,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: NetworkImage(post["data"]["image"]),
-                                    fit: BoxFit.cover,
-                                  ),
-                                  borderRadius: BorderRadius.circular(18.0),
-                                ),
-                                child: null,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            if (post["data"]["description1"] != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: Text(
-                                  post["data"]["description1"],
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              ),
-                            if (post["data"]["description2"] != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: Text(
-                                  post["data"]["description2"],
-                                  style: const TextStyle(
-                                    fontSize: 20,
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: discordColor,
+        title: const Text('View current post',
+            style: TextStyle(color: Colors.white)),
+      ),
+      body: RefreshIndicator(
+        color: discordColor,
+        onRefresh: () {
+          return Future.delayed(const Duration(seconds: 0), () {
+            loadData();
+          });
+        },
+        child: ListView(
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                height: (post["data"] == null || post.isEmpty) && mounted
+                    ? MediaQuery.of(context).size.height - 56 - 56 - 50
+                    : null,
+                alignment: Alignment.topCenter,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  margin: const EdgeInsets.all(15),
+                  child: post.isNotEmpty
+                      ? post["data"] != null
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Created on ${post["data"]["created"]}",
+                                    style: const TextStyle(fontSize: 15)),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: width - 30,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image:
+                                            NetworkImage(post["data"]["image"]),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      borderRadius: BorderRadius.circular(18.0),
+                                    ),
+                                    child: null,
                                   ),
                                 ),
-                              ),
-                            if (post["data"]["timestamp"] != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: CountUpTimer(
-                                  startTime:
-                                      DateTime.parse(post["data"]["timestamp"]),
-                                ),
-                              ),
-                            if (post["data"]["viewFullImage"])
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: Checkbox(
-                                        value: true,
-                                        onChanged: (_) {},
-                                        splashRadius: 0.0,
+                                const SizedBox(height: 5),
+                                if (post["data"]["description1"] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: Text(
+                                      post["data"]["description1"],
+                                      style: const TextStyle(
+                                        fontSize: 20,
                                       ),
                                     ),
-                                    const SizedBox(width: 10),
-                                    const Text('Allow viewing full image',
-                                        style: TextStyle(fontSize: 20)),
-                                  ],
+                                  ),
+                                if (post["data"]["description2"] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: Text(
+                                      post["data"]["description2"],
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ),
+                                if (post["data"]["timestamp"] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: CountUpTimer(
+                                      startTime: DateTime.parse(
+                                          post["data"]["timestamp"]),
+                                    ),
+                                  ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 15),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        linkTo(Uri.parse(
+                                            post["data"]["image"].toString()));
+                                      },
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all<Color>(
+                                                  post["data"]["viewFullImage"]
+                                                      ? discordColor
+                                                      : Colors.transparent),
+                                          shape: WidgetStateProperty.all<
+                                                  RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(18.0),
+                                            side: post["data"]["viewFullImage"]
+                                                ? BorderSide.none
+                                                : const BorderSide(
+                                                    color: discordColor,
+                                                    width: 2),
+                                          ))),
+                                      child: Text(
+                                        'View full image',
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: post["data"]["viewFullImage"]
+                                                ? Colors.white
+                                                : discordColor),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                          ],
-                        )
+                                const SizedBox(height: 30),
+                                const Divider(),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        clearPostAlertDialog(context);
+                                      },
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all<Color>(
+                                                  Colors.red),
+                                          shape: WidgetStateProperty.all<
+                                                  RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(18.0),
+                                          ))),
+                                      child: const Text('Clear this post',
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              color: Colors.white)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const Center(
+                              child: Text('No current post.',
+                                  style: TextStyle(fontSize: 20)),
+                            )
                       : const Center(
-                          child: Text('No current post.',
-                              style: TextStyle(fontSize: 20)),
-                        )
-                  : const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-            ),
-          ),
-        ));
+                          child: CircularProgressIndicator(
+                            color: discordColor,
+                          ),
+                        ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -163,10 +281,12 @@ class CountUpTimerState extends State<CountUpTimer> {
   }
 
   void _updateTime(Timer timer) {
-    setState(() {
-      _currentTime = DateTime.now();
-      _elapsed = _currentTime.difference(widget.startTime);
-    });
+    if (mounted) {
+      setState(() {
+        _currentTime = DateTime.now();
+        _elapsed = _currentTime.difference(widget.startTime);
+      });
+    }
   }
 
   @override

@@ -13,7 +13,6 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: discordColor,
         title: const Text('Settings', style: TextStyle(color: Colors.white)),
@@ -33,6 +32,14 @@ class _SettingsState extends State<Settings> {
                       style: TextStyle(fontSize: 20)),
                   onTap: () {
                     Navigator.pushNamed(context, '/settings/api');
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.post_add),
+                  title: const Text('Default post information',
+                      style: TextStyle(fontSize: 20)),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/settings/default-post');
                   },
                 ),
               ],

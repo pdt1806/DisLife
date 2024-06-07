@@ -13,9 +13,9 @@ Showing people what you are doing at the moment is one of the features that can 
 
 Please refer to [this README](https://github.com/pdt1806/DisLife-backend/blob/main/README.md) in the back-end's repo on how to set up the back-end server.
 
-### 2. Install
+### 2. Access the app
 
-[To be written later]
+As of today, this app can be used via [the web](https://dislife.bennynguyen.dev). If you are tech-savvy, you are welcomed to clone this repo, build the .apk or even .ipa and install it on your phone.
 
 ### 3. Connect to the back-end
 
@@ -23,31 +23,28 @@ Please refer to [this README](https://github.com/pdt1806/DisLife-backend/blob/ma
 - Enter your API Endpoint (a valid HTTP/HTTPS URL) and API Key (the 'password' you put in the .env file)
 - A message will let you know if a connection to the back-end is established successfully or not.
 
-## Guides on each function of the app
+## About each page of the app
 
 ### 1. Create new post
 
 - This is where you create your new post.
+- This serves as the initial and the main page of the app (it stays in the center).
 - You are allowed to take a photo from your camera, or choose an image from your gallery.
 - Messages are optional. But if you choose to have them, make sure they are at least 2 characters in length.
-- By default, displaying elapsed time is not enabled, while allowing people to view the image in full size is enabled.
 
-### 2. Clear current post
-
-- A modal will show up and prompt you if you really want to clear the current post or not.
-
-### 3. View current post
+### 2. View current post
 
 - This is where you see your current post.
 - If there is no current post, it will say so on your screen.
-- You can view your image (in square), see your message(s), time elapsed, and check if people can view your image in full size or not.
-<!-- - You can view your image (in square), see your message(s), time elapsed, and view your full image. Basically what people see in your RPC. -->
+- You can view your image (in square), see your message(s), time elapsed, and view your full image. Basically how people see your RPC.
 - You may not be able to change the information of your post from here or from anywhere on this app.
+- That said, you can delete your current post here.
+- To refresh this page, scroll down.
 
-### 4. Settings
+### 3. Settings
 
 - You can change the API Endpoint here.
-<!-- - Changing the default values of your post can also be done here. -->
+- Changing the default information of your post can also be done here.
 
 ## Contributions
 

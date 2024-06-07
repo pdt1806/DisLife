@@ -2,7 +2,7 @@ name: dislife
 description: "Transform your Discord Rich Presence into a Locket-like experience: instantly share your moments with friends and peers!"
 publish_to: "none"
 
-version: 1.0.1+1
+version: 1.0.2+1
 
 environment:
   sdk: ">=3.4.1 <4.0.0"
@@ -20,6 +20,18 @@ dependencies:
   package_info_plus: ^8.0.0
   flutter_svg: ^2.0.10+1
   lehttp_overrides: ^1.0.3
+  flutter_native_splash: ^2.4.0
+
+flutter_native_splash:
+  android: true
+  ios: true
+  web: true
+  image: "assets/images/icons/splash_logo.png"
+  color: "#fef7ff"
+
+  android_12:
+    color: "#fef7ff"
+    image: "assets/images/icons/splash_logo_12.png"
 
 dev_dependencies:
   flutter_test:
