@@ -25,6 +25,8 @@ class _CreateNewPostState extends State<CreateNewPost> {
       description2Invalid = false,
       uploadingPost = false;
 
+  String expirationTime = '12 hours';
+
   Uint8List? image;
 
   TextEditingController description1Controller = TextEditingController(),
@@ -35,7 +37,8 @@ class _CreateNewPostState extends State<CreateNewPost> {
       if (!isValid) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Failed to select image.'),
+            content: Text('Failed to select image.',
+                style: TextStyle(color: lightColor)),
             backgroundColor: Colors.red,
           ),
         );
@@ -45,6 +48,8 @@ class _CreateNewPostState extends State<CreateNewPost> {
   }
 
   Future<void> displayBottomSheet(BuildContext context) async {
+    Color textColor = Theme.of(context).textTheme.bodyLarge!.color!;
+
     return showModalBottomSheet(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -57,15 +62,27 @@ class _CreateNewPostState extends State<CreateNewPost> {
         shrinkWrap: true,
         children: [
           ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: const Text('Take a photo'),
+            leading: Icon(
+              Icons.camera_alt,
+              color: textColor,
+            ),
+            title: Text(
+              'Take a photo',
+              style: TextStyle(color: textColor),
+            ),
             onTap: () {
               listTileTakeImage(ImageSource.camera);
             },
           ),
           ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: const Text('Choose from gallery'),
+            leading: Icon(
+              Icons.photo_library,
+              color: textColor,
+            ),
+            title: Text(
+              'Choose from gallery',
+              style: TextStyle(color: textColor),
+            ),
             onTap: () {
               listTileTakeImage(ImageSource.gallery);
             },
@@ -83,11 +100,10 @@ class _CreateNewPostState extends State<CreateNewPost> {
 
       final bytes = await pickedFile.readAsBytes();
 
-      if (mounted) {
-        setState(() {
-          image = bytes;
-        });
-      }
+      setState(() {
+        image = bytes;
+      });
+
       return true;
     } on PlatformException catch (_) {
       return null;
@@ -95,27 +111,27 @@ class _CreateNewPostState extends State<CreateNewPost> {
   }
 
   void toggleTimestamp() {
-    if (mounted) {
-      setState(() {
-        timestamp = !timestamp;
-      });
-    }
+    setState(() {
+      timestamp = !timestamp;
+    });
   }
 
   void toggleViewFullImage() {
-    if (mounted) {
-      setState(() {
-        viewFullImage = !viewFullImage;
-      });
-    }
+    setState(() {
+      viewFullImage = !viewFullImage;
+    });
   }
 
   void toggleAdvancedInfo() {
-    if (mounted) {
-      setState(() {
-        advancedInfo = !advancedInfo;
-      });
-    }
+    setState(() {
+      advancedInfo = !advancedInfo;
+    });
+  }
+
+  void setExpirationTimeDropdownValue(String value) {
+    setState(() {
+      expirationTime = value;
+    });
   }
 
   @override
@@ -126,17 +142,17 @@ class _CreateNewPostState extends State<CreateNewPost> {
 
   void loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (mounted) {
-      setState(() {
-        description1Controller.text =
-            prefs.getString('description1_default') ?? '';
-        description2Controller.text =
-            prefs.getString('description2_default') ?? '';
-        advancedInfo = prefs.getBool('advancedInfo_default') ?? false;
-        timestamp = prefs.getBool('timestamp_default') ?? false;
-        viewFullImage = prefs.getBool('viewFullImage_default') ?? true;
-      });
-    }
+
+    setState(() {
+      description1Controller.text =
+          prefs.getString('description1_default') ?? '';
+      description2Controller.text =
+          prefs.getString('description2_default') ?? '';
+      advancedInfo = prefs.getBool('advancedInfo_default') ?? false;
+      timestamp = prefs.getBool('timestamp_default') ?? false;
+      viewFullImage = prefs.getBool('viewFullImage_default') ?? true;
+      expirationTime = prefs.getString('expirationTime_default') ?? '12 hours';
+    });
   }
 
   @override
@@ -154,21 +170,25 @@ class _CreateNewPostState extends State<CreateNewPost> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: discordColor,
+        forceMaterialTransparency: true,
         title: Row(
           children: [
             SvgPicture.asset(
               "assets/images/icons/flower.svg",
-              colorFilter:
-                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter: Theme.of(context).brightness == Brightness.light
+                  ? const ColorFilter.mode(discordColor, BlendMode.srcIn)
+                  : const ColorFilter.mode(lightColor, BlendMode.srcIn),
               width: 40,
               height: 40,
             ),
             const SizedBox(width: 5),
-            const Text(
+            Text(
               'DisLife',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? discordColor
+                      : lightColor,
+                  fontWeight: FontWeight.bold),
             )
           ],
         ),
@@ -178,9 +198,10 @@ class _CreateNewPostState extends State<CreateNewPost> {
           alignment: Alignment.topCenter,
           child: Container(
             constraints: const BoxConstraints(maxWidth: 600),
-            margin: const EdgeInsets.all(15),
+            margin: const EdgeInsets.only(left: 15, right: 15),
             child: Column(
               children: [
+                const SizedBox(height: 15),
                 SizedBox(
                   width: double.infinity,
                   height: width - 30,
@@ -209,7 +230,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         },
                         icon: image == null
                             ? const Icon(Icons.add_a_photo,
-                                size: 50, color: Colors.white)
+                                size: 50, color: lightColor)
                             : const Text("")),
                   ),
                 ),
@@ -219,8 +240,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                     border: const OutlineInputBorder(),
                     labelText: 'Message',
                     hintText: 'This field is optional.',
-                    hintStyle: const TextStyle(
-                        color: Colors.grey, fontWeight: FontWeight.normal),
+                    hintStyle: const TextStyle(fontWeight: FontWeight.normal),
                     errorText: description1Invalid
                         ? "This field requires at least 2 characters."
                         : null,
@@ -234,7 +254,6 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       width: 24,
                       height: 24,
                       child: Checkbox(
-                        activeColor: discordColor,
                         value: advancedInfo,
                         onChanged: (_) {
                           toggleAdvancedInfo();
@@ -260,9 +279,8 @@ class _CreateNewPostState extends State<CreateNewPost> {
                           border: const OutlineInputBorder(),
                           labelText: 'Message #2',
                           hintText: 'This field is optional.',
-                          hintStyle: const TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.normal),
+                          hintStyle:
+                              const TextStyle(fontWeight: FontWeight.normal),
                           errorText: description2Invalid
                               ? "This field requires at least 2 characters."
                               : null,
@@ -273,10 +291,39 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          const Text("Expiration time",
+                              style: TextStyle(fontSize: 18)),
+                          DropdownButton(
+                            dropdownColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey[900]
+                                    : lightColor,
+                            items: expirationTimeItems
+                                .map((value) => DropdownMenuItem(
+                                      value: value,
+                                      child: Text(value.toString(),
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyLarge!
+                                                  .color)),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setExpirationTimeDropdownValue(value.toString());
+                            },
+                            value: expirationTime,
+                            borderRadius: BorderRadius.circular(18.0),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
                           const Text("Enable elapsed time",
                               style: TextStyle(fontSize: 18)),
                           Switch(
-                            activeColor: discordColor,
                             inactiveTrackColor: Colors.transparent,
                             value: timestamp,
                             onChanged: (_) {
@@ -292,7 +339,6 @@ class _CreateNewPostState extends State<CreateNewPost> {
                           const Text("Allow viewing full image",
                               style: TextStyle(fontSize: 18)),
                           Switch(
-                            activeColor: discordColor,
                             inactiveTrackColor: Colors.transparent,
                             value: viewFullImage,
                             onChanged: (_) {
@@ -314,20 +360,20 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       if (image == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Please select an image.'),
+                            content: Text('Please select an image.',
+                                style: TextStyle(color: lightColor)),
                             backgroundColor: Colors.red,
                           ),
                         );
                         return;
                       }
 
-                      if (mounted) {
-                        setState(() {
-                          description1Invalid =
-                              description1Controller.text.isNotEmpty &&
-                                  description1Controller.text.length < 2;
-                        });
-                      }
+                      setState(() {
+                        description1Invalid =
+                            description1Controller.text.isNotEmpty &&
+                                description1Controller.text.length < 2;
+                      });
+
                       if (description1Controller.text.isNotEmpty &&
                           description1Controller.text.length < 2) return;
 
@@ -337,16 +383,17 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         'description1': description1Controller.text,
                         'image': base64Image,
                         'viewFullImage': viewFullImage,
+                        'expirationTime':
+                            dropdownToSeconds[expirationTime] ?? 12 * 60 * 60,
                       };
 
                       if (advancedInfo) {
-                        if (mounted) {
-                          setState(() {
-                            description2Invalid =
-                                description2Controller.text.isNotEmpty &&
-                                    description2Controller.text.length < 2;
-                          });
-                        }
+                        setState(() {
+                          description2Invalid =
+                              description2Controller.text.isNotEmpty &&
+                                  description2Controller.text.length < 2;
+                        });
+
                         if (description2Controller.text.isNotEmpty &&
                             description2Controller.text.length < 2) return;
 
@@ -354,30 +401,29 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         data['timestamp'] = timestamp;
                       }
 
-                      if (mounted) {
-                        setState(() {
-                          uploadingPost = true;
-                        });
-                      }
+                      setState(() {
+                        uploadingPost = true;
+                      });
 
                       createPost(data).then(
                         (value) {
-                          if (mounted) {
-                            setState(() {
-                              uploadingPost = false;
-                            });
-                          }
+                          setState(() {
+                            uploadingPost = false;
+                          });
+
                           if (value) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Post created.'),
+                                content: Text('Post created.',
+                                    style: TextStyle(color: lightColor)),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Failed to create post.'),
+                                content: Text('Failed to create post.',
+                                    style: TextStyle(color: lightColor)),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -390,21 +436,19 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       );
                     },
                     style: ButtonStyle(
-                        backgroundColor:
-                            WidgetStateProperty.all<Color>(discordColor),
                         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ))),
+                      borderRadius: BorderRadius.circular(18.0),
+                    ))),
                     child: uploadingPost
                         ? const CircularProgressIndicator(
-                            color: Colors.white,
+                            color: lightColor,
                           )
                         : const Text('Create post',
-                            style:
-                                TextStyle(fontSize: 20, color: Colors.white)),
+                            style: TextStyle(fontSize: 20, color: lightColor)),
                   ),
                 ),
+                const SizedBox(height: 15),
               ],
             ),
           ),

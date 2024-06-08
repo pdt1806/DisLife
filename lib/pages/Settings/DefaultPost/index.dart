@@ -13,8 +13,10 @@ class SettingsDefaultPost extends StatefulWidget {
 class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
   TextEditingController description1Controller = TextEditingController();
   TextEditingController description2Controller = TextEditingController();
+  String expirationTime = '12 hours';
   bool timestamp = false, advancedInfo = false, viewFullImage = true;
   bool description1Invalid = false, description2Invalid = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -24,71 +26,70 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
 
   void loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (mounted) {
-      setState(() {
-        description1Controller.text =
-            prefs.getString('description1_default') ?? '';
-        description2Controller.text =
-            prefs.getString('description2_default') ?? '';
-        advancedInfo = prefs.getBool('advancedInfo_default') ?? false;
-        timestamp = prefs.getBool('timestamp_default') ?? false;
-        viewFullImage = prefs.getBool('viewFullImage_default') ?? true;
-      });
-    }
+
+    setState(() {
+      description1Controller.text =
+          prefs.getString('description1_default') ?? '';
+      description2Controller.text =
+          prefs.getString('description2_default') ?? '';
+      advancedInfo = prefs.getBool('advancedInfo_default') ?? false;
+      timestamp = prefs.getBool('timestamp_default') ?? false;
+      viewFullImage = prefs.getBool('viewFullImage_default') ?? true;
+      expirationTime = prefs.getString('expirationTime_default') ?? '12 hours';
+    });
   }
 
   void toggleTimestamp() async {
-    if (mounted) {
-      setState(() {
-        timestamp = !timestamp;
-      });
-    }
+    setState(() {
+      timestamp = !timestamp;
+    });
   }
 
   void toggleViewFullImage() async {
-    if (mounted) {
-      setState(() {
-        viewFullImage = !viewFullImage;
-      });
-    }
+    setState(() {
+      viewFullImage = !viewFullImage;
+    });
   }
 
   void toggleAdvancedInfo() async {
-    if (mounted) {
-      setState(() {
-        advancedInfo = !advancedInfo;
-      });
-    }
+    setState(() {
+      advancedInfo = !advancedInfo;
+    });
   }
 
-  bool isLoading = false;
+  void setExpirationTimeDropdownValue(String value) {
+    setState(() {
+      expirationTime = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    Color textColor = Theme.of(context).textTheme.bodyLarge!.color!;
+
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         titleSpacing: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: discordColor,
-        title: const Text('Default post information',
-            style: TextStyle(color: Colors.white)),
+        title: Text('Default post information',
+            style: TextStyle(color: textColor)),
       ),
       body: SingleChildScrollView(
         child: Container(
           alignment: Alignment.topCenter,
           child: Container(
             constraints: const BoxConstraints(maxWidth: 600),
-            margin: const EdgeInsets.all(15),
+            margin: const EdgeInsets.only(left: 15, right: 15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 15),
                 TextFormField(
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     labelText: 'Message',
                     hintText: 'This field is optional.',
-                    hintStyle: const TextStyle(
-                        color: Colors.grey, fontWeight: FontWeight.normal),
+                    hintStyle: const TextStyle(fontWeight: FontWeight.normal),
                     errorText: description1Invalid
                         ? "This field requires at least 2 characters."
                         : null,
@@ -101,8 +102,7 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                     border: const OutlineInputBorder(),
                     labelText: 'Message #2',
                     hintText: 'This field is optional.',
-                    hintStyle: const TextStyle(
-                        color: Colors.grey, fontWeight: FontWeight.normal),
+                    hintStyle: const TextStyle(fontWeight: FontWeight.normal),
                     errorText: description2Invalid
                         ? "This field requires at least 2 characters."
                         : null,
@@ -116,7 +116,6 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                     const Text("Advanced information",
                         style: TextStyle(fontSize: 18)),
                     Switch(
-                      activeColor: discordColor,
                       inactiveTrackColor: Colors.transparent,
                       value: advancedInfo,
                       onChanged: (_) {
@@ -129,10 +128,32 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    const Text("Expiration time",
+                        style: TextStyle(fontSize: 18)),
+                    DropdownButton(
+                      dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+                      items: expirationTimeItems
+                          .map((value) => DropdownMenuItem(
+                                value: value,
+                                child: Text(value.toString(),
+                                    style: TextStyle(color: textColor)),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setExpirationTimeDropdownValue(value.toString());
+                      },
+                      value: expirationTime,
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     const Text("Enable elapsed time",
                         style: TextStyle(fontSize: 18)),
                     Switch(
-                      activeColor: discordColor,
                       inactiveTrackColor: Colors.transparent,
                       value: timestamp,
                       onChanged: (_) {
@@ -148,7 +169,6 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                     const Text("Allow viewing full image",
                         style: TextStyle(fontSize: 18)),
                     Switch(
-                      activeColor: discordColor,
                       inactiveTrackColor: Colors.transparent,
                       value: viewFullImage,
                       onChanged: (_) {
@@ -163,31 +183,27 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                   height: 50,
                   child: TextButton(
                     onPressed: () {
-                      if (mounted) {
-                        setState(() {
-                          description1Invalid =
-                              description1Controller.text.isNotEmpty &&
-                                  description1Controller.text.length < 2;
-                        });
-                      }
+                      setState(() {
+                        description1Invalid =
+                            description1Controller.text.isNotEmpty &&
+                                description1Controller.text.length < 2;
+                      });
+
                       if (description1Controller.text.isNotEmpty &&
                           description1Controller.text.length < 2) return;
 
-                      if (mounted) {
-                        setState(() {
-                          description2Invalid =
-                              description2Controller.text.isNotEmpty &&
-                                  description2Controller.text.length < 2;
-                        });
-                      }
+                      setState(() {
+                        description2Invalid =
+                            description2Controller.text.isNotEmpty &&
+                                description2Controller.text.length < 2;
+                      });
+
                       if (description2Controller.text.isNotEmpty &&
                           description2Controller.text.length < 2) return;
 
-                      if (mounted) {
-                        setState(() {
-                          isLoading = true;
-                        });
-                      }
+                      setState(() {
+                        isLoading = true;
+                      });
 
                       saveDefaultPostSettings(
                         advancedInfo: advancedInfo,
@@ -195,49 +211,44 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                         description2: description2Controller.text,
                         timestamp: timestamp,
                         viewFullImage: viewFullImage,
+                        expirationTime: expirationTime,
                       ).then((isValid) {
-                        if (mounted) {
-                          setState(() {
-                            isLoading = false;
-                          });
-                        }
+                        setState(() {
+                          isLoading = false;
+                        });
+
                         if (isValid) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                                  content: Text(
-                                    "Default post information saved successfully!",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  backgroundColor: Colors.green));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text(
+                                  "Default post information saved successfully!",
+                                  style: TextStyle(color: lightColor)),
+                              backgroundColor: Colors.green));
                           Navigator.pop(context);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text(
-                                  "Cannot save default post information.",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
+                                    "Cannot save default post information.",
+                                    style: TextStyle(color: lightColor)),
                                 backgroundColor: Colors.red),
                           );
                         }
                       });
                     },
                     style: ButtonStyle(
-                        backgroundColor:
-                            WidgetStateProperty.all<Color>(discordColor),
                         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ))),
+                      borderRadius: BorderRadius.circular(18.0),
+                    ))),
                     child: !isLoading
                         ? const Text('Save',
-                            style: TextStyle(fontSize: 20, color: Colors.white))
+                            style: TextStyle(fontSize: 20, color: lightColor))
                         : const CircularProgressIndicator(
-                            color: Colors.white,
+                            color: lightColor,
                           ),
                   ),
                 ),
+                const SizedBox(height: 15),
               ],
             ),
           ),

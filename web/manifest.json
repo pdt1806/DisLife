@@ -3,7 +3,7 @@
     "short_name": "DisLife",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#fef7ff",
+    "background_color": "#F6F6F6",
     "theme_color": "#5865F2",
     "description": "Transform your Discord Rich Presence into a Locket-like experience: instantly share your moments with friends and peers!",
     "orientation": "portrait-primary",

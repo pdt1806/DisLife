@@ -1,6 +1,5 @@
 <p align="center"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/icons/curved.png" width="20%"></img></p>
 <h1 align="center">DisLife</h1>
-
 <p align="center">Transform your Discord Rich Presence into a Locket-like experience: instantly share your moments with friends and peers!</p>
 
 ## The inspiration?
@@ -15,7 +14,7 @@ Please refer to [this README](https://github.com/pdt1806/DisLife-backend/blob/ma
 
 ### 2. Access the app
 
-As of today, this app can be used via [the web](https://dislife.bennynguyen.dev). If you are tech-savvy, you are welcomed to clone this repo, build the .apk or even .ipa and install it on your phone.
+As of today, this app can be used via [the web](https://dislife.bennynguyen.dev). If you are tech-savvy, you are welcome to clone this repo, build the .apk or even .ipa and install it on your phone.
 
 ### 3. Connect to the back-end
 
@@ -48,5 +47,5 @@ As of today, this app can be used via [the web](https://dislife.bennynguyen.dev)
 
 ## Contributions
 
-Contributions are welcomed in both this repo and [the back-end's repo](https://github.com/pdt1806/DisLife-backend).
+Contributions are welcome in both this repo and [the back-end's repo](https://github.com/pdt1806/DisLife-backend).
 Feel free to submit pull requests or open issues to contribute to the development of the project.

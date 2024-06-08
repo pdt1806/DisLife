@@ -1,4 +1,3 @@
-import 'package:dislife/utils/const.dart';
 import 'package:flutter/material.dart';
 
 class Settings extends StatefulWidget {
@@ -9,41 +8,59 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  final List<Map<String, dynamic>> settings = [
+    {
+      'title': 'API Endpoint',
+      'route': '/settings/api',
+      'icon': Icons.api,
+    },
+    {
+      'title': 'Default post information',
+      'route': '/settings/default-post',
+      'icon': Icons.post_add,
+    },
+    {
+      'title': 'Theme',
+      'route': '/settings/theme',
+      'icon': Icons.palette,
+    },
+    {
+      'title': 'About this app',
+      'route': '/settings/about',
+      'icon': Icons.info,
+    }
+  ];
+
   @override
   Widget build(BuildContext context) {
+    Color textColor = Theme.of(context).textTheme.bodyLarge!.color!;
+
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: discordColor,
-        title: const Text('Settings', style: TextStyle(color: Colors.white)),
+        forceMaterialTransparency: true,
+        title: Text('Settings', style: TextStyle(color: textColor)),
       ),
-      body: SingleChildScrollView(
+      body: Container(
+        alignment: Alignment.topCenter,
         child: Container(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 600),
-            margin: const EdgeInsets.all(15),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
+          constraints: const BoxConstraints(maxWidth: 600),
+          margin: const EdgeInsets.only(left: 15, right: 15),
+          child: ListView(
+            children: [
+              const SizedBox(height: 10),
+              for (var setting in settings)
                 ListTile(
-                  leading: const Icon(Icons.api),
-                  title: const Text('API Endpoint',
-                      style: TextStyle(fontSize: 20)),
+                  leading: Icon(
+                    setting['icon'],
+                    color: textColor,
+                  ),
+                  title: Text(setting['title'],
+                      style: TextStyle(fontSize: 20, color: textColor)),
                   onTap: () {
-                    Navigator.pushNamed(context, '/settings/api');
+                    Navigator.pushNamed(context, setting['route']);
                   },
                 ),
-                ListTile(
-                  leading: const Icon(Icons.post_add),
-                  title: const Text('Default post information',
-                      style: TextStyle(fontSize: 20)),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/settings/default-post');
-                  },
-                ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

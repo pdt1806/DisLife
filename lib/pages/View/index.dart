@@ -27,22 +27,51 @@ class _ViewPostState extends State<ViewPost> {
         post = {};
       });
     }
+
     fetchPost().then((value) {
       if (mounted) {
         setState(() {
           post = value;
         });
       }
+      if (post["data"] != null) {
+        startTimer(post["data"]["timestamp"], post["data"]["expirationTime"]);
+      }
+    });
+  }
+
+  void startTimer(String dateString, int expirationTimeInSeconds) {
+    DateTime createdDate = DateTime.parse(dateString);
+    Duration duration = Duration(seconds: expirationTimeInSeconds);
+
+    DateTime expirationDate = createdDate.add(duration);
+    Duration timeUntilExpiration = expirationDate.difference(DateTime.now());
+
+    Timer(timeUntilExpiration, () {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        backgroundColor: discordColor,
+        content: Text('Post has expired. Refresh to clear this page.',
+            style: TextStyle(color: lightColor)),
+      ));
     });
   }
 
   clearPostAlertDialog(BuildContext context) {
     AlertDialog alert = AlertDialog(
-      title: const Text("Clear current post"),
-      content: const Text("Are you sure you want to clear the current post?"),
+      title: Text("Clear current post",
+          style:
+              TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color)),
+      content: Text("Are you sure you want to clear the current post?",
+          style:
+              TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color)),
       actions: [
         TextButton(
-          child: const Text("Clear"),
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all<Color>(Colors.transparent),
+          ),
+          child: Text("Clear",
+              style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge!.color)),
           onPressed: () {
             clearPost().then(
               (value) {
@@ -52,12 +81,15 @@ class _ViewPostState extends State<ViewPost> {
                       post = {"data": null};
                     });
                   }
+
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Post cleared.'),
+                      content: Text('Post cleared.',
+                          style: TextStyle(color: lightColor)),
                       backgroundColor: Colors.green));
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Failed to clear post.'),
+                      content: Text('Failed to clear post.',
+                          style: TextStyle(color: lightColor)),
                       backgroundColor: Colors.red));
                 }
               },
@@ -66,6 +98,9 @@ class _ViewPostState extends State<ViewPost> {
           },
         ),
         TextButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all<Color>(Colors.transparent),
+          ),
           child: const Text("Cancel", style: TextStyle(color: Colors.red)),
           onPressed: () {
             Navigator.of(context).pop();
@@ -90,162 +125,155 @@ class _ViewPostState extends State<ViewPost> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: discordColor,
-        title: const Text('View current post',
-            style: TextStyle(color: Colors.white)),
+        forceMaterialTransparency: true,
+        title: Text('View current post',
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color)),
       ),
       body: RefreshIndicator(
-        color: discordColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         onRefresh: () {
           return Future.delayed(const Duration(seconds: 0), () {
             loadData();
           });
         },
-        child: ListView(
-          children: [
-            SingleChildScrollView(
-              child: Container(
-                height: (post["data"] == null || post.isEmpty) && mounted
-                    ? MediaQuery.of(context).size.height - 56 - 56 - 50
-                    : null,
-                alignment: Alignment.topCenter,
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  margin: const EdgeInsets.all(15),
-                  child: post.isNotEmpty
-                      ? post["data"] != null
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Created on ${post["data"]["created"]}",
-                                    style: const TextStyle(fontSize: 15)),
-                                const SizedBox(height: 10),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: width - 30,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image:
-                                            NetworkImage(post["data"]["image"]),
-                                        fit: BoxFit.cover,
-                                      ),
-                                      borderRadius: BorderRadius.circular(18.0),
-                                    ),
-                                    child: null,
+        child: SingleChildScrollView(
+          child: Container(
+            height: (post["data"] == null || post.isEmpty) && mounted
+                ? MediaQuery.of(context).size.height - 56 - 56 - 50
+                : null,
+            alignment: Alignment.topCenter,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 600),
+              margin: const EdgeInsets.only(left: 15, right: 15),
+              child: post.isNotEmpty
+                  ? post["data"] != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 15),
+                            Text("Created on ${post["data"]["created"]}",
+                                style: const TextStyle(fontSize: 15)),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: double.infinity,
+                              height: width - 30,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: NetworkImage(post["data"]["image"]),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ),
+                                child: null,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            if (post["data"]["description1"] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  post["data"]["description1"],
+                                  style: const TextStyle(
+                                    fontSize: 20,
                                   ),
                                 ),
-                                const SizedBox(height: 5),
-                                if (post["data"]["description1"] != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: Text(
-                                      post["data"]["description1"],
-                                      style: const TextStyle(
+                              ),
+                            if (post["data"]["description2"] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  post["data"]["description2"],
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            if (post["data"]["timestamp"] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: CountUpTimer(
+                                  startTime:
+                                      DateTime.parse(post["data"]["timestamp"]),
+                                ),
+                              ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 15),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: TextButton(
+                                  onPressed: () {
+                                    linkTo(Uri.parse(
+                                        post["data"]["image"].toString()));
+                                  },
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          WidgetStateProperty.all<Color>(
+                                              post["data"]["viewFullImage"]
+                                                  ? discordColor
+                                                  : Colors.transparent),
+                                      shape: WidgetStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(18.0),
+                                        side: post["data"]["viewFullImage"]
+                                            ? BorderSide.none
+                                            : const BorderSide(
+                                                color: discordColor, width: 2),
+                                      ))),
+                                  child: Text(
+                                    'View full image',
+                                    style: TextStyle(
                                         fontSize: 20,
-                                      ),
-                                    ),
-                                  ),
-                                if (post["data"]["description2"] != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: Text(
-                                      post["data"]["description2"],
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ),
-                                if (post["data"]["timestamp"] != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: CountUpTimer(
-                                      startTime: DateTime.parse(
-                                          post["data"]["timestamp"]),
-                                    ),
-                                  ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 15),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 50,
-                                    child: TextButton(
-                                      onPressed: () {
-                                        linkTo(Uri.parse(
-                                            post["data"]["image"].toString()));
-                                      },
-                                      style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStateProperty.all<Color>(
-                                                  post["data"]["viewFullImage"]
-                                                      ? discordColor
-                                                      : Colors.transparent),
-                                          shape: WidgetStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                              RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18.0),
-                                            side: post["data"]["viewFullImage"]
-                                                ? BorderSide.none
-                                                : const BorderSide(
-                                                    color: discordColor,
-                                                    width: 2),
-                                          ))),
-                                      child: Text(
-                                        'View full image',
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            color: post["data"]["viewFullImage"]
-                                                ? Colors.white
-                                                : discordColor),
-                                      ),
-                                    ),
+                                        color: post["data"]["viewFullImage"]
+                                            ? lightColor
+                                            : discordColor),
                                   ),
                                 ),
-                                const SizedBox(height: 30),
-                                const Divider(),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 50,
-                                    child: TextButton(
-                                      onPressed: () {
-                                        clearPostAlertDialog(context);
-                                      },
-                                      style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStateProperty.all<Color>(
-                                                  Colors.red),
-                                          shape: WidgetStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                              RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18.0),
-                                          ))),
-                                      child: const Text('Clear this post',
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.white)),
-                                    ),
-                                  ),
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            const Divider(),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: TextButton(
+                                  onPressed: () {
+                                    clearPostAlertDialog(context);
+                                  },
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          WidgetStateProperty.all<Color>(
+                                              Colors.red),
+                                      shape: WidgetStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(18.0),
+                                      ))),
+                                  child: const Text('Clear this post',
+                                      style: TextStyle(
+                                          fontSize: 20, color: lightColor)),
                                 ),
-                              ],
-                            )
-                          : const Center(
-                              child: Text('No current post.',
-                                  style: TextStyle(fontSize: 20)),
-                            )
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                          ],
+                        )
                       : const Center(
-                          child: CircularProgressIndicator(
-                            color: discordColor,
-                          ),
-                        ),
-                ),
-              ),
-            )
-          ],
+                          child: Text('No current post',
+                              style: TextStyle(fontSize: 20)),
+                        )
+                  : const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+            ),
+          ),
         ),
       ),
     );

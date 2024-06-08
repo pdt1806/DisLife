@@ -1,7 +1,8 @@
-import 'package:dislife/utils/const.dart';
 import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../utils/const.dart';
 
 class SettingsAPI extends StatefulWidget {
   const SettingsAPI({super.key});
@@ -32,11 +33,9 @@ class _SettingsAPIState extends State<SettingsAPI> {
   }
 
   void togglePasswordVisibility() {
-    if (mounted) {
-      setState(() {
-        passwordVisible = !passwordVisible;
-      });
-    }
+    setState(() {
+      passwordVisible = !passwordVisible;
+    });
   }
 
   bool isLoading = false;
@@ -45,21 +44,22 @@ class _SettingsAPIState extends State<SettingsAPI> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         titleSpacing: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: discordColor,
-        title:
-            const Text('API Endpoint', style: TextStyle(color: Colors.white)),
+        title: Text('API Endpoint',
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color)),
       ),
       body: SingleChildScrollView(
         child: Container(
           alignment: Alignment.topCenter,
           child: Container(
             constraints: const BoxConstraints(maxWidth: 600),
-            margin: const EdgeInsets.all(15),
+            margin: const EdgeInsets.only(left: 15, right: 15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 15),
                 TextFormField(
                   enableSuggestions: false,
                   autocorrect: false,
@@ -104,41 +104,35 @@ class _SettingsAPIState extends State<SettingsAPI> {
                       String apiEndpoint = apiEndpointController.text;
                       String apiKey = apiKeyController.text;
 
-                      if (mounted) {
-                        setState(() {
-                          apiEndpointInvalid = apiEndpoint.isEmpty ||
-                              !Uri.parse(apiEndpoint).isAbsolute;
-                        });
-                      }
+                      setState(() {
+                        apiEndpointInvalid = apiEndpoint.isEmpty ||
+                            !Uri.parse(apiEndpoint).isAbsolute;
+                      });
+
                       if (apiEndpoint.isEmpty ||
                           !Uri.parse(apiEndpoint).isAbsolute) return;
 
-                      if (mounted) {
-                        setState(() {
-                          apiKeyInvalid = apiKey.isEmpty;
-                        });
-                      }
+                      setState(() {
+                        apiKeyInvalid = apiKey.isEmpty;
+                      });
+
                       if (apiKey.isEmpty) return;
 
-                      if (mounted) {
-                        setState(() {
-                          isLoading = true;
-                        });
-                      }
+                      setState(() {
+                        isLoading = true;
+                      });
 
                       savingAPIEndpoint(apiEndpoint, apiKey).then((isValid) {
-                        if (mounted) {
-                          setState(() {
-                            isLoading = false;
-                          });
-                        }
+                        setState(() {
+                          isLoading = false;
+                        });
+
                         if (isValid) {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(
                                   content: Text(
                                     "API Endpoint saved successfully!",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: lightColor),
                                   ),
                                   backgroundColor: Colors.green));
                           Navigator.pop(context);
@@ -147,7 +141,7 @@ class _SettingsAPIState extends State<SettingsAPI> {
                             const SnackBar(
                                 content: Text(
                                   "Cannot connect to the API Endpoint.",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: lightColor),
                                 ),
                                 backgroundColor: Colors.red),
                           );
@@ -155,20 +149,19 @@ class _SettingsAPIState extends State<SettingsAPI> {
                       });
                     },
                     style: ButtonStyle(
-                        backgroundColor:
-                            WidgetStateProperty.all<Color>(discordColor),
                         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ))),
+                      borderRadius: BorderRadius.circular(18.0),
+                    ))),
                     child: !isLoading
                         ? const Text('Save',
-                            style: TextStyle(fontSize: 20, color: Colors.white))
+                            style: TextStyle(fontSize: 20, color: lightColor))
                         : const CircularProgressIndicator(
-                            color: Colors.white,
+                            color: lightColor,
                           ),
                   ),
                 ),
+                const SizedBox(height: 15),
               ],
             ),
           ),

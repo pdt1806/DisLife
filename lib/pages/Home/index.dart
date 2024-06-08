@@ -1,7 +1,6 @@
 import 'package:dislife/pages/Create/index.dart';
 import 'package:dislife/pages/Settings/index.dart';
 import 'package:dislife/pages/View/index.dart';
-import 'package:dislife/utils/const.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -26,23 +25,20 @@ class _HomeState extends State<Home> {
 
   void _initializeAppVersion() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    if (mounted) {
-      setState(() {
-        appVersion = packageInfo.version;
-      });
-    }
+
+    setState(() {
+      appVersion = packageInfo.version;
+    });
   }
 
   void changePage(int index) {
-    if (mounted) {
-      setState(() {
-        _pageController.animateToPage(
-          index,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linearToEaseOut,
-        );
-      });
-    }
+    setState(() {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linearToEaseOut,
+      );
+    });
   }
 
   @override
@@ -57,9 +53,7 @@ class _HomeState extends State<Home> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (value) {
-          if (mounted) {
-            setState(() => _currentIndex = value);
-          }
+          setState(() => _currentIndex = value);
         },
         children: [
           const ViewPost(),
@@ -70,7 +64,6 @@ class _HomeState extends State<Home> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        fixedColor: discordColor,
         currentIndex: _currentIndex,
         onTap: (value) => changePage(value),
         items: const [
