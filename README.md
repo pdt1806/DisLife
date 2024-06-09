@@ -2,9 +2,9 @@
 <h1 align="center">DisLife</h1>
 <p align="center">Transform your Discord Rich Presence into a Locket-like experience: instantly share your moments with friends and peers!</p>
 
-<img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/dislife-readme.png" width="100%"></img>
+<p align="center"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/dislife-readme.png" width="100%"></img></p>
 
-## 💡 The inspiration?
+## 💡 The inspiration
 
 Showing people what you are doing at the moment is one of the features that can be seen in modern-day social media platforms, such as Stories on Instagram/Facebook or Locket. People can decide if they want to see the image or not, and it is also their choice to message you if they are interested. The absence of you texting others about what you are doing is what makes this feature the top choice of teenagers right now. Seeing this, I wondered if I could also do the same thing on Discord, allowing people to know what I am doing without me direct messaging them first. Rich Presence is a suitable place to implement something like this. Not to mention, before this project, I had no experience in developing mobile/cross-platform apps; DisLife was a chance for me to develop one.
 
