@@ -32,7 +32,7 @@ As of today, this app can be used via [the web](https://dislife.bennynguyen.dev)
 ### 3. Connect to the back-end
 
 - Go to Settings -> API Endpoint
-- Enter your API Endpoint (a valid HTTP/HTTPS URL) and API Key (the 'password' you put in the .env file)
+- Enter your API Endpoint (a valid HTTP/HTTPS URL) and your password (which you've put in the .env file)
 - A message will let you know if a connection to the back-end is established successfully or not.
 
 ## ℹ️ About each page of the app
@@ -60,10 +60,10 @@ As of today, this app can be used via [the web](https://dislife.bennynguyen.dev)
 
 ## 🔒 Security and Considerations
 
-### API Key
+### Password
 
-- The API key you set is only used to connect to your own server, not ours. You can change it anytime.
-- It's not encrypted, so avoid using DisLife on untrusted Wi-Fi (like public hotspots).
+- The password you set is only used to connect to your own server, not ours. You can change it anytime.
+- Ensure that your server connection uses HTTPS to prevent exposing your password to potential attackers.
 
 ### Image Storage
 

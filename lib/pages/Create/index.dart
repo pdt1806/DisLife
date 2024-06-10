@@ -4,14 +4,14 @@ import 'package:dislife/utils/const.dart';
 import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateNewPost extends StatefulWidget {
   final void Function(int) changePage;
+  final Uint8List? image;
 
-  const CreateNewPost({super.key, required this.changePage});
+  const CreateNewPost(
+      {super.key, required this.changePage, required this.image});
 
   @override
   State<CreateNewPost> createState() => _CreateNewPostState();
@@ -27,88 +27,8 @@ class _CreateNewPostState extends State<CreateNewPost> {
 
   String expirationTime = '12 hours';
 
-  Uint8List? image;
-
   TextEditingController description1Controller = TextEditingController(),
       description2Controller = TextEditingController();
-
-  void listTileTakeImage(ImageSource source) {
-    takeImage(source).then((isValid) {
-      if (!isValid) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to select image.',
-                style: TextStyle(color: lightColor)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      Navigator.pop(context);
-    });
-  }
-
-  Future<void> displayBottomSheet(BuildContext context) async {
-    Color textColor = Theme.of(context).textTheme.bodyLarge!.color!;
-
-    return showModalBottomSheet(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(0),
-          topRight: Radius.circular(0),
-        ),
-      ),
-      context: context,
-      builder: (context) => ListView(
-        shrinkWrap: true,
-        children: [
-          ListTile(
-            leading: Icon(
-              Icons.camera_alt,
-              color: textColor,
-            ),
-            title: Text(
-              'Take a photo',
-              style: TextStyle(color: textColor),
-            ),
-            onTap: () {
-              listTileTakeImage(ImageSource.camera);
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.photo_library,
-              color: textColor,
-            ),
-            title: Text(
-              'Choose from gallery',
-              style: TextStyle(color: textColor),
-            ),
-            onTap: () {
-              listTileTakeImage(ImageSource.gallery);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<dynamic> takeImage(ImageSource source) async {
-    try {
-      final XFile? pickedFile = await ImagePicker().pickImage(source: source);
-
-      if (pickedFile == null) return false;
-
-      final bytes = await pickedFile.readAsBytes();
-
-      setState(() {
-        image = bytes;
-      });
-
-      return true;
-    } on PlatformException catch (_) {
-      return null;
-    }
-  }
 
   void toggleTimestamp() {
     setState(() {
@@ -137,6 +57,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
   @override
   void initState() {
     loadData();
+
     super.initState();
   }
 
@@ -152,6 +73,25 @@ class _CreateNewPostState extends State<CreateNewPost> {
       timestamp = prefs.getBool('timestamp_default') ?? false;
       viewFullImage = prefs.getBool('viewFullImage_default') ?? true;
       expirationTime = prefs.getString('expirationTime_default') ?? '12 hours';
+    });
+
+    final apiEndpoint = prefs.getString('apiEndpoint') ?? '';
+    final password = prefs.getString('password') ?? '';
+
+    verifyEndpoint(apiEndpoint, password).then((res) {
+      if (res.statusCode != 200 && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              'Could not connect to the API. Please check your API endpoint and password.',
+              style: TextStyle(color: lightColor),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
     });
   }
 
@@ -171,27 +111,10 @@ class _CreateNewPostState extends State<CreateNewPost> {
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
-        title: Row(
-          children: [
-            SvgPicture.asset(
-              "assets/images/icons/flower.svg",
-              colorFilter: Theme.of(context).brightness == Brightness.light
-                  ? const ColorFilter.mode(discordColor, BlendMode.srcIn)
-                  : const ColorFilter.mode(lightColor, BlendMode.srcIn),
-              width: 40,
-              height: 40,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              'DisLife',
-              style: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.light
-                      ? discordColor
-                      : lightColor,
-                  fontWeight: FontWeight.bold),
-            )
-          ],
-        ),
+        titleSpacing: 0,
+        title: Text('Create new post',
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color)),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -203,17 +126,17 @@ class _CreateNewPostState extends State<CreateNewPost> {
               children: [
                 const SizedBox(height: 15),
                 SizedBox(
-                  width: double.infinity,
+                  width: width - 30,
                   height: width - 30,
                   child: Container(
                     decoration: BoxDecoration(
-                      image: image != null
+                      image: widget.image != null
                           ? DecorationImage(
-                              image: MemoryImage(image!),
+                              image: MemoryImage(widget.image!),
                               fit: BoxFit.cover,
                             )
                           : null,
-                      color: image == null ? discordColor : null,
+                      color: widget.image == null ? discordColor : null,
                       borderRadius: BorderRadius.circular(18.0),
                     ),
                     child: IconButton(
@@ -225,11 +148,9 @@ class _CreateNewPostState extends State<CreateNewPost> {
                                     RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
                             ))),
-                        onPressed: () {
-                          displayBottomSheet(context);
-                        },
-                        icon: image == null
-                            ? const Icon(Icons.add_a_photo,
+                        onPressed: () {},
+                        icon: widget.image == null
+                            ? const Icon(Icons.photo,
                                 size: 50, color: lightColor)
                             : const Text("")),
                   ),
@@ -357,7 +278,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                     onPressed: () async {
                       Map<String, dynamic> data;
 
-                      if (image == null) {
+                      if (widget.image == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Please select an image.',
@@ -377,7 +298,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                       if (description1Controller.text.isNotEmpty &&
                           description1Controller.text.length < 2) return;
 
-                      final base64Image = base64Encode(image!);
+                      final base64Image = base64Encode(widget.image!);
 
                       data = {
                         'description1': description1Controller.text,
@@ -395,7 +316,9 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         });
 
                         if (description2Controller.text.isNotEmpty &&
-                            description2Controller.text.length < 2) return;
+                            description2Controller.text.length < 2) {
+                          return;
+                        }
 
                         data['description2'] = description2Controller.text;
                         data['timestamp'] = timestamp;
@@ -430,6 +353,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
                           }
 
                           if (value) {
+                            Navigator.pop(context);
                             widget.changePage(0);
                           }
                         },

@@ -6,26 +6,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ------------------------------------------
 // Verify endpoint
 
-Future<http.Response> verifyEndpoint(String apiEndpoint, String apiKey) async {
-  return await http.get(
+Future<http.Response> verifyEndpoint(
+    String apiEndpoint, String password) async {
+  return await http.post(
     Uri.parse('$apiEndpoint/verify'),
-    headers: <String, String>{'Authorization': apiKey},
+    headers: <String, String>{'Content-Type': 'application/json'},
+    body: jsonEncode({'password': password}),
   );
 }
 
-Future<bool> savingAPIEndpoint(String apiEndpoint, String apiKey) async {
+Future<bool> savingAPIEndpoint(String apiEndpoint, String password) async {
   try {
     if (apiEndpoint.endsWith('/')) {
       apiEndpoint = apiEndpoint.substring(0, apiEndpoint.length - 1);
     }
 
-    http.Response response = await verifyEndpoint(apiEndpoint, apiKey);
+    http.Response response = await verifyEndpoint(apiEndpoint, password);
     bool isValid = response.statusCode == 200;
 
     if (isValid) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('apiEndpoint', apiEndpoint);
-      prefs.setString('apiKey', apiKey);
+      prefs.setString('password', password);
     }
 
     return isValid;
@@ -37,10 +39,11 @@ Future<bool> savingAPIEndpoint(String apiEndpoint, String apiKey) async {
 // ------------------------------------------
 // Clear post
 
-Future<http.Response> clearPostHTTP(String apiEndpoint, String apiKey) async {
-  return await http.get(
+Future<http.Response> clearPostHTTP(String apiEndpoint, String password) async {
+  return await http.post(
     Uri.parse('$apiEndpoint/clear'),
-    headers: <String, String>{'Authorization': apiKey},
+    headers: <String, String>{'Content-Type': 'application/json'},
+    body: jsonEncode({'password': password}),
   );
 }
 
@@ -48,9 +51,9 @@ Future<bool> clearPost() async {
   try {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String apiEndpoint = prefs.getString('apiEndpoint') ?? '';
-    String apiKey = prefs.getString('apiKey') ?? '';
+    String password = prefs.getString('password') ?? '';
 
-    bool cleared = await clearPostHTTP(apiEndpoint, apiKey)
+    bool cleared = await clearPostHTTP(apiEndpoint, password)
         .then((response) => response.statusCode == 200)
         .catchError((error) => false);
 
@@ -66,14 +69,13 @@ Future<bool> clearPost() async {
 Future<http.Response> createPostHTTP(Map<String, dynamic> data) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String apiEndpoint = prefs.getString('apiEndpoint') ?? '';
-  String apiKey = prefs.getString('apiKey') ?? '';
+  String password = prefs.getString('password') ?? '';
+
+  data['password'] = password;
 
   return await http.post(
     Uri.parse('$apiEndpoint/post'),
-    headers: <String, String>{
-      'Authorization': apiKey,
-      'Content-Type': 'application/json'
-    },
+    headers: <String, String>{'Content-Type': 'application/json'},
     body: jsonEncode(data),
   );
 }
@@ -96,11 +98,12 @@ Future<bool> createPost(Map<String, dynamic> data) async {
 Future<http.Response> fetchPostHTTP() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String apiEndpoint = prefs.getString('apiEndpoint') ?? '';
-  String apiKey = prefs.getString('apiKey') ?? '';
+  String password = prefs.getString('password') ?? '';
 
-  return await http.get(
+  return await http.post(
     Uri.parse('$apiEndpoint/fetch'),
-    headers: <String, String>{'Authorization': apiKey},
+    headers: <String, String>{'Content-Type': 'application/json'},
+    body: jsonEncode({'password': password}),
   );
 }
 
@@ -113,7 +116,7 @@ Future<Map<String, dynamic>> fetchPost() async {
     return post;
   } catch (e) {
     return {
-      "message": "Failed to fetch post",
+      "message": "Failed to fetch post.",
     };
   }
 }

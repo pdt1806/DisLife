@@ -13,11 +13,11 @@ class SettingsAPI extends StatefulWidget {
 
 class _SettingsAPIState extends State<SettingsAPI> {
   TextEditingController apiEndpointController = TextEditingController(),
-      apiKeyController = TextEditingController();
+      passwordController = TextEditingController();
 
   bool passwordVisible = false,
       apiEndpointInvalid = false,
-      apiKeyInvalid = false;
+      passwordInvalid = false;
 
   @override
   void initState() {
@@ -28,7 +28,7 @@ class _SettingsAPIState extends State<SettingsAPI> {
   void loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     apiEndpointController.text = prefs.getString('apiEndpoint') ?? '';
-    apiKeyController.text = prefs.getString('apiKey') ?? '';
+    passwordController.text = prefs.getString('password') ?? '';
     passwordVisible = false;
   }
 
@@ -79,7 +79,7 @@ class _SettingsAPIState extends State<SettingsAPI> {
                   autocorrect: false,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
-                    labelText: 'API Key',
+                    labelText: 'Password',
                     prefixIcon: const Icon(Icons.key),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -91,9 +91,10 @@ class _SettingsAPIState extends State<SettingsAPI> {
                         togglePasswordVisibility();
                       },
                     ),
-                    errorText: apiKeyInvalid ? 'API Key cannot be empty' : null,
+                    errorText:
+                        passwordInvalid ? 'Password cannot be empty' : null,
                   ),
-                  controller: apiKeyController,
+                  controller: passwordController,
                 ),
                 const SizedBox(height: 15),
                 SizedBox(
@@ -102,7 +103,7 @@ class _SettingsAPIState extends State<SettingsAPI> {
                   child: TextButton(
                     onPressed: () {
                       String apiEndpoint = apiEndpointController.text;
-                      String apiKey = apiKeyController.text;
+                      String password = passwordController.text;
 
                       setState(() {
                         apiEndpointInvalid = apiEndpoint.isEmpty ||
@@ -113,16 +114,16 @@ class _SettingsAPIState extends State<SettingsAPI> {
                           !Uri.parse(apiEndpoint).isAbsolute) return;
 
                       setState(() {
-                        apiKeyInvalid = apiKey.isEmpty;
+                        passwordInvalid = password.isEmpty;
                       });
 
-                      if (apiKey.isEmpty) return;
+                      if (password.isEmpty) return;
 
                       setState(() {
                         isLoading = true;
                       });
 
-                      savingAPIEndpoint(apiEndpoint, apiKey).then((isValid) {
+                      savingAPIEndpoint(apiEndpoint, password).then((isValid) {
                         setState(() {
                           isLoading = false;
                         });

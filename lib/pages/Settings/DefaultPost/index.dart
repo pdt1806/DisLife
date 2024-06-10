@@ -64,6 +64,13 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
   }
 
   @override
+  void dispose() {
+    description1Controller.dispose();
+    description2Controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Color textColor = Theme.of(context).textTheme.bodyLarge!.color!;
 

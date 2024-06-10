@@ -1,11 +1,13 @@
-import 'package:dislife/pages/Create/index.dart';
+import 'package:camera/camera.dart';
 import 'package:dislife/pages/Settings/index.dart';
+import 'package:dislife/pages/Shot/index.dart';
 import 'package:dislife/pages/View/index.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final List<CameraDescription> cameras;
+  const Home({super.key, required this.cameras});
 
   @override
   State<Home> createState() => _HomeState();
@@ -57,8 +59,9 @@ class _HomeState extends State<Home> {
         },
         children: [
           const ViewPost(),
-          CreateNewPost(
+          ShotNewPost(
             changePage: changePage,
+            cameras: widget.cameras,
           ),
           const Settings()
         ],
@@ -68,7 +71,7 @@ class _HomeState extends State<Home> {
         onTap: (value) => changePage(value),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.image),
+            icon: Icon(Icons.view_comfy_sharp),
             label: 'View',
           ),
           BottomNavigationBarItem(

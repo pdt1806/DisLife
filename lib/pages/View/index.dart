@@ -4,6 +4,7 @@ import 'package:dislife/utils/const.dart';
 import 'package:dislife/utils/fns.dart';
 import 'package:dislife/utils/http.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ViewPost extends StatefulWidget {
   const ViewPost({super.key});
@@ -21,12 +22,32 @@ class _ViewPostState extends State<ViewPost> {
     super.initState();
   }
 
-  void loadData() {
+  void loadData() async {
     if (mounted) {
       setState(() {
         post = {};
       });
     }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final apiEndpoint = prefs.getString('apiEndpoint') ?? '';
+    final password = prefs.getString('password') ?? '';
+
+    verifyEndpoint(apiEndpoint, password).then((res) {
+      if (res.statusCode != 200 && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              'Could not connect to the API. Please check your API endpoint and password.',
+              style: TextStyle(color: lightColor),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    });
 
     fetchPost().then((value) {
       if (mounted) {
@@ -38,6 +59,11 @@ class _ViewPostState extends State<ViewPost> {
         startTimer(post["data"]["timestamp"], post["data"]["expirationTime"]);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void startTimer(String dateString, int expirationTimeInSeconds) {

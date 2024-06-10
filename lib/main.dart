@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:camera/camera.dart';
 import 'package:dislife/pages/Home/index.dart';
 import 'package:dislife/pages/Settings/API/index.dart';
 import 'package:dislife/pages/Settings/DefaultPost/index.dart';
@@ -9,20 +8,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lehttp_overrides/lehttp_overrides.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 import 'pages/Settings/About/index.dart';
 
-void main() {
+Future<void> main() async {
   if (!kIsWeb) {
     if (Platform.isAndroid) {
       HttpOverrides.global = LEHttpOverrides(allowExpiredDSTX3: true);
     }
   }
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    final cameras = await availableCameras();
+    runApp(MyApp(cameras: cameras));
+  } catch (e) {
+    runApp(const MyApp(cameras: []));
+  }
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final List<CameraDescription> cameras;
+  const MyApp({super.key, required this.cameras});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -280,7 +287,7 @@ class _MyAppState extends State<MyApp> {
         'Dark': ThemeMode.dark,
         'System default': ThemeMode.system,
       }[theme],
-      home: const Home(),
+      home: Home(cameras: widget.cameras),
       routes: {
         '/settings/api': (context) => const SettingsAPI(),
         '/settings/default-post': (context) => const SettingsDefaultPost(),
