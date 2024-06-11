@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 class ShotNewPost extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -29,7 +30,7 @@ class _ShotNewPostState extends State<ShotNewPost> {
     ResolutionPreset.max,
     enableAudio: false,
   );
-  bool takingPicture = false, choosingImage = false, isPortrait = true;
+  bool takingPicture = false, isPortrait = true, frontOrBack = true;
 
   Future<dynamic> chooseImage() async {
     try {
@@ -93,8 +94,12 @@ class _ShotNewPostState extends State<ShotNewPost> {
   }
 
   void startCamera() async {
+    if (cameraController.value.isInitialized) {
+      await cameraController.dispose();
+    }
+
     cameraController = CameraController(
-      widget.cameras[0],
+      widget.cameras[(frontOrBack || widget.cameras.length < 2) ? 0 : 1],
       ResolutionPreset.max,
       enableAudio: false,
     );
@@ -169,14 +174,19 @@ class _ShotNewPostState extends State<ShotNewPost> {
                                     fit: BoxFit.cover,
                                     child: SizedBox(
                                       width: isPortrait
-                                          ? (width - 30) /
-                                              cameraController.value.aspectRatio
-                                          : width - 30,
-                                      height: isPortrait
-                                          ? width - 30
-                                          : (width - 30) /
+                                          ? (width - 30)
+                                          : (width - 30) *
                                               cameraController
                                                   .value.aspectRatio,
+                                      height: isPortrait
+                                          ? Platform.isIOS
+                                              ? (width - 30) /
+                                                  cameraController
+                                                      .value.aspectRatio
+                                              : (width - 30) *
+                                                  cameraController
+                                                      .value.aspectRatio
+                                          : width - 30,
                                       child: CameraPreview(cameraController),
                                     ),
                                   ),
@@ -211,14 +221,8 @@ class _ShotNewPostState extends State<ShotNewPost> {
                             flex: 1,
                             child: RawMaterialButton(
                               onPressed: () {
-                                setState(() {
-                                  choosingImage = true;
-                                });
                                 chooseImage().then(
                                   (image) {
-                                    setState(() {
-                                      choosingImage = false;
-                                    });
                                     if (image == null) {
                                       return;
                                     }
@@ -239,30 +243,14 @@ class _ShotNewPostState extends State<ShotNewPost> {
                               },
                               padding: const EdgeInsets.all(15.0),
                               shape: const CircleBorder(),
-                              child: !choosingImage
-                                  ? Icon(
-                                      Icons.image,
-                                      size: 40.0,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge!
-                                          .color,
-                                    )
-                                  : Center(
-                                      child: SizedBox(
-                                        width: 40,
-                                        height: 40,
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Theme.of(context)
-                                                          .textTheme
-                                                          .bodyLarge!
-                                                          .color ??
-                                                      discordColor),
-                                        ),
-                                      ),
-                                    ),
+                              child: Icon(
+                                Icons.image,
+                                size: 40.0,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .color,
+                              ),
                             ),
                           ),
                           cameraController.value.isInitialized
@@ -324,14 +312,34 @@ class _ShotNewPostState extends State<ShotNewPost> {
                                               ),
                                             ),
                                           ),
-                                  ))
-                              : const SizedBox(),
-                          cameraController.value.isInitialized
-                              ? const Expanded(
-                                  flex: 1,
-                                  child: SizedBox(),
+                                  ),
                                 )
                               : const SizedBox(),
+                          widget.cameras.length > 1
+                              ? Expanded(
+                                  flex: 1,
+                                  child: RawMaterialButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        frontOrBack = !frontOrBack;
+                                      });
+                                      startCamera();
+                                    },
+                                    padding: const EdgeInsets.all(15.0),
+                                    shape: const CircleBorder(),
+                                    child: Icon(
+                                      Icons.cameraswitch,
+                                      size: 40.0,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .color,
+                                    ),
+                                  ),
+                                )
+                              : cameraController.value.isInitialized
+                                  ? const Expanded(flex: 1, child: SizedBox())
+                                  : const SizedBox(),
                         ],
                       ),
                     ],

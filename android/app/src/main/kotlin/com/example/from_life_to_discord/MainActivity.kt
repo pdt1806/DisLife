@@ -1,4 +1,4 @@
-package com.example.dislife
+package com.pdt1806.dislife
 
 import io.flutter.embedding.android.FlutterActivity
 

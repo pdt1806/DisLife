@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:dislife/utils/const.dart';
 import 'package:dislife/utils/fns.dart';
 import 'package:dislife/utils/http.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 class ViewPost extends StatefulWidget {
   const ViewPost({super.key});
@@ -143,6 +145,52 @@ class _ViewPostState extends State<ViewPost> {
     );
   }
 
+  void clearPostAlertDialogIOS(BuildContext context) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Clear current post'),
+        content: const Text('Are you sure you want to clear the current post?'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              clearPost().then(
+                (value) {
+                  if (value) {
+                    if (mounted) {
+                      setState(() {
+                        post = {"data": null};
+                      });
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Post cleared.',
+                            style: TextStyle(color: lightColor)),
+                        backgroundColor: Colors.green));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Failed to clear post.',
+                            style: TextStyle(color: lightColor)),
+                        backgroundColor: Colors.red));
+                  }
+                },
+              );
+              Navigator.of(context).pop();
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width > 600
@@ -157,6 +205,7 @@ class _ViewPostState extends State<ViewPost> {
                 TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color)),
       ),
       body: RefreshIndicator(
+        color: discordColor,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         onRefresh: () {
           return Future.delayed(const Duration(seconds: 0), () {
@@ -164,6 +213,7 @@ class _ViewPostState extends State<ViewPost> {
           });
         },
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Container(
             height: (post["data"] == null || post.isEmpty) && mounted
                 ? MediaQuery.of(context).size.height - 56 - 56 - 50
@@ -270,7 +320,9 @@ class _ViewPostState extends State<ViewPost> {
                                 height: 50,
                                 child: TextButton(
                                   onPressed: () {
-                                    clearPostAlertDialog(context);
+                                    Platform.isIOS
+                                        ? clearPostAlertDialogIOS(context)
+                                        : clearPostAlertDialog(context);
                                   },
                                   style: ButtonStyle(
                                       backgroundColor:
@@ -291,9 +343,21 @@ class _ViewPostState extends State<ViewPost> {
                             const SizedBox(height: 15),
                           ],
                         )
-                      : const Center(
-                          child: Text('No current post',
-                              style: TextStyle(fontSize: 20)),
+                      : SizedBox(
+                          height:
+                              MediaQuery.of(context).size.height - 56 - 56 - 50,
+                          child: Center(
+                            child: Text(
+                              'No post available',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .color,
+                              ),
+                            ),
+                          ),
                         )
                   : const Center(
                       child: CircularProgressIndicator(),

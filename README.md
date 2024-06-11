@@ -2,7 +2,12 @@
 <h1 align="center">DisLife</h1>
 <p align="center">Transform your Discord Rich Presence into a Locket-like experience: instantly share your moments with friends and peers!</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/dislife-readme.png" width="100%"></img></p>
+<p><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/dislife-readme.png" width="100%"></img></p>
+
+<p><a href="https://dislife.bennynguyen.dev"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/tags/webapp.png" height="70"></a>
+&nbsp;
+<a href="https://github.com/pdt1806/DisLife/releases/tag/v1.2.1%2B1"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/tags/apk.png" height="70"></a>
+&nbsp;</p>
 
 ## 💡 The inspiration
 
@@ -27,7 +32,7 @@ Please refer to [this README](https://github.com/pdt1806/DisLife-backend/blob/ma
 
 ### 2. Access the app
 
-As of today, this app can be used via [the web](https://dislife.bennynguyen.dev). If you are tech-savvy, you are welcome to clone this repo, build the .apk or even .ipa and install it on your phone.
+As of today, you've had the option to use this app via the web by visiting [this link](https://dislife.bennynguyen.dev) or by downloading the .apk file from the latest release. If you're tech-savvy, you can also clone the repository, build the app, and install it on your phone.
 
 ### 3. Connect to the back-end
 
@@ -41,7 +46,7 @@ As of today, this app can be used via [the web](https://dislife.bennynguyen.dev)
 
 - This is where you create your new post.
 - This serves as the initial and the main page of the app (it stays in the center).
-- You are allowed to take a photo from your camera, or choose an image from your gallery.
+- You are allowed to take a photo from your camera (front and back), or choose an image from your gallery.
 - Messages are optional. But if you choose to have them, make sure they are at least 2 characters in length.
 
 ### 2. View current post

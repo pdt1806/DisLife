@@ -1,6 +1,8 @@
 import 'package:dislife/utils/fns.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 import '../../../utils/const.dart';
 
@@ -14,11 +16,8 @@ class SettingsTheme extends StatefulWidget {
 
 class _SettingsThemeState extends State<SettingsTheme> {
   String theme = 'Light';
-  final List<String> themes = [
-    'Light',
-    'Dark',
-    'System default',
-  ];
+  int cupertinoTheme = themes.indexOf('Light');
+
   bool isLoading = false;
 
   @override
@@ -32,6 +31,7 @@ class _SettingsThemeState extends State<SettingsTheme> {
 
     setState(() {
       theme = prefs.getString('theme') ?? 'Light';
+      cupertinoTheme = themes.indexOf(theme);
     });
   }
 
@@ -39,6 +39,24 @@ class _SettingsThemeState extends State<SettingsTheme> {
     setState(() {
       theme = value;
     });
+  }
+
+  void _showDialog(Widget child) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => Container(
+        height: 216,
+        padding: const EdgeInsets.only(top: 6.0),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: SafeArea(
+          top: false,
+          child: child,
+        ),
+      ),
+    );
   }
 
   @override
@@ -68,24 +86,83 @@ class _SettingsThemeState extends State<SettingsTheme> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text("Theme", style: TextStyle(fontSize: 18)),
-                    DropdownButton(
-                      dropdownColor:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? Colors.grey[900]
-                              : lightColor,
-                      items: themes
-                          .map((value) => DropdownMenuItem(
-                                value: value,
-                                child: Text(value.toString(),
-                                    style: TextStyle(color: textColor)),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        setTheme(value.toString());
-                      },
-                      value: theme,
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
+                    Platform.isIOS
+                        ? CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () => _showDialog(
+                              CupertinoPicker(
+                                magnification: 1.22,
+                                squeeze: 1.2,
+                                useMagnifier: true,
+                                itemExtent: 40.0,
+                                scrollController: FixedExtentScrollController(
+                                  initialItem: cupertinoTheme,
+                                ),
+                                onSelectedItemChanged: (int selectedItem) {
+                                  setState(() {
+                                    cupertinoTheme = selectedItem;
+                                    theme = themes[selectedItem];
+                                  });
+                                },
+                                children: List<Widget>.generate(
+                                  themes.length,
+                                  (int index) {
+                                    return Center(
+                                      child: Text(themes[index]),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: textColor.withOpacity(0.2),
+                                    ),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          themes[cupertinoTheme],
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            color: textColor,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Icon(
+                                          Icons.arrow_drop_down_sharp,
+                                          color: textColor,
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(height: 3),
+                                  ],
+                                )),
+                          )
+                        : DropdownButton(
+                            dropdownColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey[900]
+                                    : lightColor,
+                            items: themes
+                                .map((value) => DropdownMenuItem(
+                                      value: value,
+                                      child: Text(value.toString(),
+                                          style: TextStyle(color: textColor)),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setTheme(value.toString());
+                            },
+                            value: theme,
+                            borderRadius: BorderRadius.circular(18.0),
+                          ),
                   ],
                 ),
                 const SizedBox(height: 15),

@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:dislife/utils/const.dart';
 import 'package:dislife/utils/http.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 class CreateNewPost extends StatefulWidget {
   final void Function(int) changePage;
@@ -26,6 +28,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
       uploadingPost = false;
 
   String expirationTime = '12 hours';
+  int cupertinoExpirationTime = expirationTimeItems.indexOf('12 hours');
 
   TextEditingController description1Controller = TextEditingController(),
       description2Controller = TextEditingController();
@@ -73,6 +76,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
       timestamp = prefs.getBool('timestamp_default') ?? false;
       viewFullImage = prefs.getBool('viewFullImage_default') ?? true;
       expirationTime = prefs.getString('expirationTime_default') ?? '12 hours';
+      cupertinoExpirationTime = expirationTimeItems.indexOf(expirationTime);
     });
 
     final apiEndpoint = prefs.getString('apiEndpoint') ?? '';
@@ -93,6 +97,24 @@ class _CreateNewPostState extends State<CreateNewPost> {
         return;
       }
     });
+  }
+
+  void _showDialog(Widget child) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => Container(
+        height: 216,
+        padding: const EdgeInsets.only(top: 6.0),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: SafeArea(
+          top: false,
+          child: child,
+        ),
+      ),
+    );
   }
 
   @override
@@ -214,28 +236,107 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         children: [
                           const Text("Expiration time",
                               style: TextStyle(fontSize: 18)),
-                          DropdownButton(
-                            dropdownColor:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.grey[900]
-                                    : lightColor,
-                            items: expirationTimeItems
-                                .map((value) => DropdownMenuItem(
-                                      value: value,
-                                      child: Text(value.toString(),
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyLarge!
-                                                  .color)),
-                                    ))
-                                .toList(),
-                            onChanged: (value) {
-                              setExpirationTimeDropdownValue(value.toString());
-                            },
-                            value: expirationTime,
-                            borderRadius: BorderRadius.circular(18.0),
-                          ),
+                          Platform.isIOS
+                              ? CupertinoButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () => _showDialog(
+                                    CupertinoPicker(
+                                      magnification: 1.22,
+                                      squeeze: 1.2,
+                                      useMagnifier: true,
+                                      itemExtent: 40.0,
+                                      scrollController:
+                                          FixedExtentScrollController(
+                                        initialItem: cupertinoExpirationTime,
+                                      ),
+                                      onSelectedItemChanged:
+                                          (int selectedItem) {
+                                        setState(() {
+                                          cupertinoExpirationTime =
+                                              selectedItem;
+                                          expirationTime =
+                                              expirationTimeItems[selectedItem];
+                                        });
+                                      },
+                                      children: List<Widget>.generate(
+                                        expirationTimeItems.length,
+                                        (int index) {
+                                          return Center(
+                                            child: Text(
+                                                expirationTimeItems[index]),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge!
+                                                .color!
+                                                .withOpacity(0.2),
+                                          ),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                expirationTimeItems[
+                                                    cupertinoExpirationTime],
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge!
+                                                      .color,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 5),
+                                              Icon(
+                                                Icons.arrow_drop_down_sharp,
+                                                color: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyLarge!
+                                                    .color,
+                                              )
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3),
+                                        ],
+                                      )),
+                                )
+                              : DropdownButton(
+                                  dropdownColor: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[900]
+                                      : lightColor,
+                                  items: expirationTimeItems
+                                      .map((value) => DropdownMenuItem(
+                                            value: value,
+                                            child: Text(
+                                              value.toString(),
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyLarge!
+                                                    .color,
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setExpirationTimeDropdownValue(
+                                        value.toString());
+                                  },
+                                  value: expirationTime,
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ),
                         ],
                       ),
                       const SizedBox(height: 15),

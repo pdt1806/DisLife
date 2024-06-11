@@ -34,3 +34,9 @@ const Map<String, int> dropdownToSeconds = {
   "12 hours": 12 * 60 * 60,
   "24 hours": 24 * 60 * 60,
 };
+
+const List<String> themes = [
+  'Light',
+  'Dark',
+  'System default',
+];
