@@ -279,36 +279,73 @@ class _ViewPostState extends State<ViewPost> {
                               child: SizedBox(
                                 width: double.infinity,
                                 height: 50,
-                                child: TextButton(
-                                  onPressed: () {
-                                    linkTo(Uri.parse(
-                                        post["data"]["image"].toString()));
-                                  },
-                                  style: ButtonStyle(
-                                      backgroundColor:
-                                          WidgetStateProperty.all<Color>(
-                                              post["data"]["viewFullImage"]
-                                                  ? discordColor
-                                                  : Colors.transparent),
-                                      shape: WidgetStateProperty.all<
-                                              RoundedRectangleBorder>(
-                                          RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(18.0),
-                                        side: post["data"]["viewFullImage"]
-                                            ? BorderSide.none
-                                            : const BorderSide(
-                                                color: discordColor, width: 2),
-                                      ))),
-                                  child: Text(
-                                    'View full image',
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        color: post["data"]["viewFullImage"]
-                                            ? lightColor
-                                            : discordColor),
-                                  ),
-                                ),
+                                child: Platform.isIOS
+                                    ? DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: !post["data"]
+                                                    ["viewFullImage"]
+                                                ? discordColor
+                                                : Colors.transparent,
+                                            width: 2.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        child: CupertinoButton(
+                                          color: post["data"]["viewFullImage"]
+                                              ? discordColor
+                                              : Colors.transparent,
+                                          child: Text(
+                                            'View full image',
+                                            style: TextStyle(
+                                              color: post["data"]
+                                                      ["viewFullImage"]
+                                                  ? lightColor
+                                                  : discordColor,
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            linkTo(Uri.parse(post["data"]
+                                                    ["image"]
+                                                .toString()));
+                                          },
+                                        ),
+                                      )
+                                    : TextButton(
+                                        onPressed: () {
+                                          linkTo(Uri.parse(post["data"]["image"]
+                                              .toString()));
+                                        },
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                WidgetStateProperty.all<Color>(
+                                                    post["data"]
+                                                            ["viewFullImage"]
+                                                        ? discordColor
+                                                        : Colors.transparent),
+                                            shape: WidgetStateProperty.all<
+                                                    RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18.0),
+                                              side: post["data"]
+                                                      ["viewFullImage"]
+                                                  ? BorderSide.none
+                                                  : const BorderSide(
+                                                      color: discordColor,
+                                                      width: 2),
+                                            ))),
+                                        child: Text(
+                                          'View full image',
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              color: post["data"]
+                                                      ["viewFullImage"]
+                                                  ? lightColor
+                                                  : discordColor),
+                                        ),
+                                      ),
                               ),
                             ),
                             const SizedBox(height: 30),
@@ -318,26 +355,36 @@ class _ViewPostState extends State<ViewPost> {
                               child: SizedBox(
                                 width: double.infinity,
                                 height: 50,
-                                child: TextButton(
-                                  onPressed: () {
-                                    Platform.isIOS
-                                        ? clearPostAlertDialogIOS(context)
-                                        : clearPostAlertDialog(context);
-                                  },
-                                  style: ButtonStyle(
-                                      backgroundColor:
-                                          WidgetStateProperty.all<Color>(
-                                              Colors.red),
-                                      shape: WidgetStateProperty.all<
-                                              RoundedRectangleBorder>(
-                                          RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(18.0),
-                                      ))),
-                                  child: const Text('Clear this post',
-                                      style: TextStyle(
-                                          fontSize: 20, color: lightColor)),
-                                ),
+                                child: Platform.isIOS
+                                    ? CupertinoButton(
+                                        color: Colors.red,
+                                        child: const Text(
+                                          'Clear this post',
+                                          style: TextStyle(color: lightColor),
+                                        ),
+                                        onPressed: () {
+                                          clearPostAlertDialogIOS(context);
+                                        },
+                                      )
+                                    : TextButton(
+                                        onPressed: () {
+                                          clearPostAlertDialog(context);
+                                        },
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                WidgetStateProperty.all<Color>(
+                                                    Colors.red),
+                                            shape: WidgetStateProperty.all<
+                                                    RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18.0),
+                                            ))),
+                                        child: const Text('Clear this post',
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                color: lightColor)),
+                                      ),
                               ),
                             ),
                             const SizedBox(height: 15),

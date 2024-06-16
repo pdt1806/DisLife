@@ -6,7 +6,7 @@
 
 <p><a href="https://dislife.bennynguyen.dev"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/tags/webapp.png" height="70"></a>
 &nbsp;
-<a href="https://github.com/pdt1806/DisLife/releases/tag/v1.2.1%2B1"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/tags/apk.png" height="70"></a>
+<a href="https://github.com/pdt1806/DisLife/releases/tag/v1.2.2"><img src="https://raw.githubusercontent.com/pdt1806/DisLife/main/assets/images/tags/apk.png" height="70"></a>
 &nbsp;</p>
 
 ## 💡 The inspiration

@@ -92,6 +92,56 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
     super.dispose();
   }
 
+  void onSubmit() {
+    setState(() {
+      description1Invalid = description1Controller.text.isNotEmpty &&
+          description1Controller.text.length < 2;
+    });
+
+    if (description1Controller.text.isNotEmpty &&
+        description1Controller.text.length < 2) return;
+
+    setState(() {
+      description2Invalid = description2Controller.text.isNotEmpty &&
+          description2Controller.text.length < 2;
+    });
+
+    if (description2Controller.text.isNotEmpty &&
+        description2Controller.text.length < 2) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    saveDefaultPostSettings(
+      advancedInfo: advancedInfo,
+      description1: description1Controller.text,
+      description2: description2Controller.text,
+      timestamp: timestamp,
+      viewFullImage: viewFullImage,
+      expirationTime: expirationTime,
+    ).then((isValid) {
+      setState(() {
+        isLoading = false;
+      });
+
+      if (isValid) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Default post information saved successfully!",
+                style: TextStyle(color: lightColor)),
+            backgroundColor: Colors.green));
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Cannot save default post information.",
+                  style: TextStyle(color: lightColor)),
+              backgroundColor: Colors.red),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Color textColor = Theme.of(context).textTheme.bodyLarge!.color!;
@@ -144,13 +194,21 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                   children: [
                     const Text("Advanced information",
                         style: TextStyle(fontSize: 18)),
-                    Switch(
-                      inactiveTrackColor: Colors.transparent,
-                      value: advancedInfo,
-                      onChanged: (_) {
-                        toggleAdvancedInfo();
-                      },
-                    )
+                    Platform.isIOS
+                        ? CupertinoSwitch(
+                            activeColor: discordColor,
+                            value: advancedInfo,
+                            onChanged: (_) {
+                              toggleAdvancedInfo();
+                            },
+                          )
+                        : Switch(
+                            inactiveTrackColor: Colors.transparent,
+                            value: advancedInfo,
+                            onChanged: (_) {
+                              toggleAdvancedInfo();
+                            },
+                          )
                   ],
                 ),
                 const SizedBox(height: 15),
@@ -246,13 +304,21 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                   children: [
                     const Text("Enable elapsed time",
                         style: TextStyle(fontSize: 18)),
-                    Switch(
-                      inactiveTrackColor: Colors.transparent,
-                      value: timestamp,
-                      onChanged: (_) {
-                        toggleTimestamp();
-                      },
-                    )
+                    Platform.isIOS
+                        ? CupertinoSwitch(
+                            activeColor: discordColor,
+                            value: timestamp,
+                            onChanged: (_) {
+                              toggleTimestamp();
+                            },
+                          )
+                        : Switch(
+                            inactiveTrackColor: Colors.transparent,
+                            value: timestamp,
+                            onChanged: (_) {
+                              toggleTimestamp();
+                            },
+                          )
                   ],
                 ),
                 const SizedBox(height: 15),
@@ -261,85 +327,52 @@ class _SettingsDefaultPostState extends State<SettingsDefaultPost> {
                   children: [
                     const Text("Allow viewing full image",
                         style: TextStyle(fontSize: 18)),
-                    Switch(
-                      inactiveTrackColor: Colors.transparent,
-                      value: viewFullImage,
-                      onChanged: (_) {
-                        toggleViewFullImage();
-                      },
-                    )
+                    Platform.isIOS
+                        ? CupertinoSwitch(
+                            activeColor: discordColor,
+                            value: viewFullImage,
+                            onChanged: (_) {
+                              toggleViewFullImage();
+                            },
+                          )
+                        : Switch(
+                            inactiveTrackColor: Colors.transparent,
+                            value: viewFullImage,
+                            onChanged: (_) {
+                              toggleViewFullImage();
+                            },
+                          )
                   ],
                 ),
                 const SizedBox(height: 15),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        description1Invalid =
-                            description1Controller.text.isNotEmpty &&
-                                description1Controller.text.length < 2;
-                      });
-
-                      if (description1Controller.text.isNotEmpty &&
-                          description1Controller.text.length < 2) return;
-
-                      setState(() {
-                        description2Invalid =
-                            description2Controller.text.isNotEmpty &&
-                                description2Controller.text.length < 2;
-                      });
-
-                      if (description2Controller.text.isNotEmpty &&
-                          description2Controller.text.length < 2) return;
-
-                      setState(() {
-                        isLoading = true;
-                      });
-
-                      saveDefaultPostSettings(
-                        advancedInfo: advancedInfo,
-                        description1: description1Controller.text,
-                        description2: description2Controller.text,
-                        timestamp: timestamp,
-                        viewFullImage: viewFullImage,
-                        expirationTime: expirationTime,
-                      ).then((isValid) {
-                        setState(() {
-                          isLoading = false;
-                        });
-
-                        if (isValid) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                              content: Text(
-                                  "Default post information saved successfully!",
-                                  style: TextStyle(color: lightColor)),
-                              backgroundColor: Colors.green));
-                          Navigator.pop(context);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    "Cannot save default post information.",
-                                    style: TextStyle(color: lightColor)),
-                                backgroundColor: Colors.red),
-                          );
-                        }
-                      });
-                    },
-                    style: ButtonStyle(
-                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                    ))),
-                    child: !isLoading
-                        ? const Text('Save',
-                            style: TextStyle(fontSize: 20, color: lightColor))
-                        : const CircularProgressIndicator(
-                            color: lightColor,
+                  child: Platform.isIOS
+                      ? CupertinoButton(
+                          color: discordColor,
+                          onPressed: isLoading ? null : () => onSubmit(),
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(color: lightColor),
                           ),
-                  ),
+                        )
+                      : TextButton(
+                          onPressed: isLoading ? null : () => onSubmit(),
+                          style: ButtonStyle(
+                              shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                          ))),
+                          child: !isLoading
+                              ? const Text('Save',
+                                  style: TextStyle(
+                                      fontSize: 20, color: lightColor))
+                              : const CircularProgressIndicator(
+                                  color: lightColor,
+                                ),
+                        ),
                 ),
                 const SizedBox(height: 15),
               ],

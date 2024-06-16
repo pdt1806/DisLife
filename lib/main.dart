@@ -193,7 +193,7 @@ class _MyAppState extends State<MyApp> {
           }),
           thumbColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return discordColor;
+              return Colors.white;
             }
             return Colors.grey[600];
           }),

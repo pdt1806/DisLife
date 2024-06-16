@@ -1,6 +1,8 @@
 import 'package:dislife/utils/http.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 import '../../../utils/const.dart';
 
@@ -18,6 +20,8 @@ class _SettingsAPIState extends State<SettingsAPI> {
   bool passwordVisible = false,
       apiEndpointInvalid = false,
       passwordInvalid = false;
+
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -38,7 +42,52 @@ class _SettingsAPIState extends State<SettingsAPI> {
     });
   }
 
-  bool isLoading = false;
+  void onSubmit() {
+    String apiEndpoint = apiEndpointController.text;
+    String password = passwordController.text;
+
+    setState(() {
+      apiEndpointInvalid =
+          apiEndpoint.isEmpty || !Uri.parse(apiEndpoint).isAbsolute;
+    });
+
+    if (apiEndpoint.isEmpty || !Uri.parse(apiEndpoint).isAbsolute) return;
+
+    setState(() {
+      passwordInvalid = password.isEmpty;
+    });
+
+    if (password.isEmpty) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    savingAPIEndpoint(apiEndpoint, password).then((isValid) {
+      setState(() {
+        isLoading = false;
+      });
+
+      if (isValid) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+              "API Endpoint saved successfully!",
+              style: TextStyle(color: lightColor),
+            ),
+            backgroundColor: Colors.green));
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text(
+                "Cannot connect to the API Endpoint.",
+                style: TextStyle(color: lightColor),
+              ),
+              backgroundColor: Colors.red),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,67 +149,30 @@ class _SettingsAPIState extends State<SettingsAPI> {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: TextButton(
-                    onPressed: () {
-                      String apiEndpoint = apiEndpointController.text;
-                      String password = passwordController.text;
-
-                      setState(() {
-                        apiEndpointInvalid = apiEndpoint.isEmpty ||
-                            !Uri.parse(apiEndpoint).isAbsolute;
-                      });
-
-                      if (apiEndpoint.isEmpty ||
-                          !Uri.parse(apiEndpoint).isAbsolute) return;
-
-                      setState(() {
-                        passwordInvalid = password.isEmpty;
-                      });
-
-                      if (password.isEmpty) return;
-
-                      setState(() {
-                        isLoading = true;
-                      });
-
-                      savingAPIEndpoint(apiEndpoint, password).then((isValid) {
-                        setState(() {
-                          isLoading = false;
-                        });
-
-                        if (isValid) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                                  content: Text(
-                                    "API Endpoint saved successfully!",
-                                    style: TextStyle(color: lightColor),
-                                  ),
-                                  backgroundColor: Colors.green));
-                          Navigator.pop(context);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                  "Cannot connect to the API Endpoint.",
-                                  style: TextStyle(color: lightColor),
+                  child: Platform.isIOS
+                      ? CupertinoButton(
+                          color: discordColor,
+                          onPressed: isLoading ? null : () => onSubmit(),
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(color: lightColor),
+                          ))
+                      : TextButton(
+                          onPressed: isLoading ? null : () => onSubmit(),
+                          style: ButtonStyle(
+                              shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                          ))),
+                          child: !isLoading
+                              ? const Text('Save',
+                                  style: TextStyle(
+                                      fontSize: 20, color: lightColor))
+                              : const CircularProgressIndicator(
+                                  color: lightColor,
                                 ),
-                                backgroundColor: Colors.red),
-                          );
-                        }
-                      });
-                    },
-                    style: ButtonStyle(
-                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                    ))),
-                    child: !isLoading
-                        ? const Text('Save',
-                            style: TextStyle(fontSize: 20, color: lightColor))
-                        : const CircularProgressIndicator(
-                            color: lightColor,
-                          ),
-                  ),
+                        ),
                 ),
                 const SizedBox(height: 15),
               ],

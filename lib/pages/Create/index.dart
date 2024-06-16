@@ -25,7 +25,7 @@ class _CreateNewPostState extends State<CreateNewPost> {
       viewFullImage = true,
       description1Invalid = false,
       description2Invalid = false,
-      uploadingPost = false;
+      isLoading = false;
 
   String expirationTime = '12 hours';
   int cupertinoExpirationTime = expirationTimeItems.indexOf('12 hours');
@@ -124,6 +124,88 @@ class _CreateNewPostState extends State<CreateNewPost> {
     super.dispose();
   }
 
+  Future<void> onSubmit() async {
+    Map<String, dynamic> data;
+
+    if (widget.image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an image.',
+              style: TextStyle(color: lightColor)),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      description1Invalid = description1Controller.text.isNotEmpty &&
+          description1Controller.text.length < 2;
+    });
+
+    if (description1Controller.text.isNotEmpty &&
+        description1Controller.text.length < 2) return;
+
+    final base64Image = base64Encode(widget.image!);
+
+    data = {
+      'description1': description1Controller.text,
+      'image': base64Image,
+      'viewFullImage': viewFullImage,
+      'expirationTime': dropdownToSeconds[expirationTime] ?? 12 * 60 * 60,
+    };
+
+    if (advancedInfo) {
+      setState(() {
+        description2Invalid = description2Controller.text.isNotEmpty &&
+            description2Controller.text.length < 2;
+      });
+
+      if (description2Controller.text.isNotEmpty &&
+          description2Controller.text.length < 2) {
+        return;
+      }
+
+      data['description2'] = description2Controller.text;
+      data['timestamp'] = timestamp;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    createPost(data).then(
+      (value) {
+        setState(() {
+          isLoading = false;
+        });
+
+        if (value) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content:
+                  Text('Post created.', style: TextStyle(color: lightColor)),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to create post.',
+                  style: TextStyle(color: lightColor)),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+
+        if (value) {
+          Navigator.pop(context);
+          widget.changePage(0);
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width > 600
@@ -196,12 +278,20 @@ class _CreateNewPostState extends State<CreateNewPost> {
                     SizedBox(
                       width: 24,
                       height: 24,
-                      child: Checkbox(
-                        value: advancedInfo,
-                        onChanged: (_) {
-                          toggleAdvancedInfo();
-                        },
-                      ),
+                      child: Platform.isIOS
+                          ? CupertinoCheckbox(
+                              activeColor: discordColor,
+                              value: advancedInfo,
+                              onChanged: (_) {
+                                toggleAdvancedInfo();
+                              },
+                            )
+                          : Checkbox(
+                              value: advancedInfo,
+                              onChanged: (_) {
+                                toggleAdvancedInfo();
+                              },
+                            ),
                     ),
                     const SizedBox(width: 10),
                     GestureDetector(
@@ -345,13 +435,21 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         children: [
                           const Text("Enable elapsed time",
                               style: TextStyle(fontSize: 18)),
-                          Switch(
-                            inactiveTrackColor: Colors.transparent,
-                            value: timestamp,
-                            onChanged: (_) {
-                              toggleTimestamp();
-                            },
-                          )
+                          Platform.isIOS
+                              ? CupertinoSwitch(
+                                  activeColor: discordColor,
+                                  value: timestamp,
+                                  onChanged: (_) {
+                                    toggleTimestamp();
+                                  },
+                                )
+                              : Switch(
+                                  inactiveTrackColor: Colors.transparent,
+                                  value: timestamp,
+                                  onChanged: (_) {
+                                    toggleTimestamp();
+                                  },
+                                )
                         ],
                       ),
                       const SizedBox(height: 15),
@@ -360,13 +458,21 @@ class _CreateNewPostState extends State<CreateNewPost> {
                         children: [
                           const Text("Allow viewing full image",
                               style: TextStyle(fontSize: 18)),
-                          Switch(
-                            inactiveTrackColor: Colors.transparent,
-                            value: viewFullImage,
-                            onChanged: (_) {
-                              toggleViewFullImage();
-                            },
-                          )
+                          Platform.isIOS
+                              ? CupertinoSwitch(
+                                  activeColor: discordColor,
+                                  value: viewFullImage,
+                                  onChanged: (_) {
+                                    toggleViewFullImage();
+                                  },
+                                )
+                              : Switch(
+                                  inactiveTrackColor: Colors.transparent,
+                                  value: viewFullImage,
+                                  onChanged: (_) {
+                                    toggleViewFullImage();
+                                  },
+                                )
                         ],
                       ),
                     ],
@@ -375,103 +481,39 @@ class _CreateNewPostState extends State<CreateNewPost> {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: TextButton(
-                    onPressed: () async {
-                      Map<String, dynamic> data;
-
-                      if (widget.image == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please select an image.',
-                                style: TextStyle(color: lightColor)),
-                            backgroundColor: Colors.red,
+                  child: Platform.isIOS
+                      ? CupertinoButton(
+                          color: discordColor,
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  await onSubmit();
+                                },
+                          child: const Text(
+                            'Create post',
+                            style: TextStyle(color: lightColor),
                           ),
-                        );
-                        return;
-                      }
-
-                      setState(() {
-                        description1Invalid =
-                            description1Controller.text.isNotEmpty &&
-                                description1Controller.text.length < 2;
-                      });
-
-                      if (description1Controller.text.isNotEmpty &&
-                          description1Controller.text.length < 2) return;
-
-                      final base64Image = base64Encode(widget.image!);
-
-                      data = {
-                        'description1': description1Controller.text,
-                        'image': base64Image,
-                        'viewFullImage': viewFullImage,
-                        'expirationTime':
-                            dropdownToSeconds[expirationTime] ?? 12 * 60 * 60,
-                      };
-
-                      if (advancedInfo) {
-                        setState(() {
-                          description2Invalid =
-                              description2Controller.text.isNotEmpty &&
-                                  description2Controller.text.length < 2;
-                        });
-
-                        if (description2Controller.text.isNotEmpty &&
-                            description2Controller.text.length < 2) {
-                          return;
-                        }
-
-                        data['description2'] = description2Controller.text;
-                        data['timestamp'] = timestamp;
-                      }
-
-                      setState(() {
-                        uploadingPost = true;
-                      });
-
-                      createPost(data).then(
-                        (value) {
-                          setState(() {
-                            uploadingPost = false;
-                          });
-
-                          if (value) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Post created.',
-                                    style: TextStyle(color: lightColor)),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to create post.',
-                                    style: TextStyle(color: lightColor)),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-
-                          if (value) {
-                            Navigator.pop(context);
-                            widget.changePage(0);
-                          }
-                        },
-                      );
-                    },
-                    style: ButtonStyle(
-                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                    ))),
-                    child: uploadingPost
-                        ? const CircularProgressIndicator(
-                            color: lightColor,
-                          )
-                        : const Text('Create post',
-                            style: TextStyle(fontSize: 20, color: lightColor)),
-                  ),
+                        )
+                      : TextButton(
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  await onSubmit();
+                                },
+                          style: ButtonStyle(
+                              shape: WidgetStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                          ))),
+                          child: isLoading
+                              ? const CircularProgressIndicator(
+                                  color: lightColor,
+                                )
+                              : const Text('Create post',
+                                  style: TextStyle(
+                                      fontSize: 20, color: lightColor)),
+                        ),
                 ),
                 const SizedBox(height: 15),
               ],

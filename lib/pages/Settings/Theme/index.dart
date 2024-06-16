@@ -62,6 +62,36 @@ class _SettingsThemeState extends State<SettingsTheme> {
   @override
   Widget build(BuildContext context) {
     Color textColor = Theme.of(context).textTheme.bodyLarge!.color!;
+    final arg = (ModalRoute.of(context)?.settings.arguments ??
+        <String, dynamic>{}) as Map;
+
+    void onSubmit() {
+      setState(() {
+        isLoading = true;
+      });
+
+      saveTheme(theme, widget.updateThemeRuntime).then((isValid) {
+        setState(() {
+          isLoading = false;
+        });
+
+        if (isValid) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Theme saved successfully!",
+                  style: TextStyle(color: lightColor)),
+              backgroundColor: Colors.green));
+          arg['updateTheme']();
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text("Cannot save theme.",
+                    style: TextStyle(color: lightColor)),
+                backgroundColor: Colors.red),
+          );
+        }
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -169,49 +199,33 @@ class _SettingsThemeState extends State<SettingsTheme> {
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        isLoading = true;
-                      });
-
-                      saveTheme(theme, widget.updateThemeRuntime)
-                          .then((isValid) {
-                        setState(() {
-                          isLoading = false;
-                        });
-
-                        if (isValid) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Theme saved successfully!",
-                                      style: TextStyle(color: lightColor)),
-                                  backgroundColor: Colors.green));
-                          Navigator.pop(context);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Cannot save theme.",
-                                    style: TextStyle(color: lightColor)),
-                                backgroundColor: Colors.red),
-                          );
-                        }
-                      });
-                    },
-                    style: ButtonStyle(
-                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                      ),
-                    ),
-                    child: !isLoading
-                        ? const Text('Save',
-                            style: TextStyle(fontSize: 20, color: lightColor))
-                        : const CircularProgressIndicator(
-                            color: lightColor,
+                  child: Platform.isIOS
+                      ? CupertinoButton(
+                          color: discordColor,
+                          onPressed: isLoading ? null : () => onSubmit(),
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(color: lightColor),
                           ),
-                  ),
+                        )
+                      : TextButton(
+                          onPressed: isLoading ? null : () => onSubmit(),
+                          style: ButtonStyle(
+                            shape:
+                                WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                              ),
+                            ),
+                          ),
+                          child: !isLoading
+                              ? const Text('Save',
+                                  style: TextStyle(
+                                      fontSize: 20, color: lightColor))
+                              : const CircularProgressIndicator(
+                                  color: lightColor,
+                                ),
+                        ),
                 ),
                 const SizedBox(height: 15),
               ],

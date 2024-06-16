@@ -2,17 +2,24 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_io/io.dart';
 
 // ------------------------------------------
 // Verify endpoint
 
 Future<http.Response> verifyEndpoint(
     String apiEndpoint, String password) async {
-  return await http.post(
-    Uri.parse('$apiEndpoint/verify'),
-    headers: <String, String>{'Content-Type': 'application/json'},
-    body: jsonEncode({'password': password}),
-  );
+  try {
+    return await http.post(
+      Uri.parse('$apiEndpoint/verify'),
+      headers: <String, String>{'Content-Type': 'application/json'},
+      body: jsonEncode({'password': password}),
+    );
+  } on SocketException {
+    return http.Response('Failed to connect to the server.', 500);
+  } catch (e) {
+    return http.Response('Failed to verify the endpoint.', 500);
+  }
 }
 
 Future<bool> savingAPIEndpoint(String apiEndpoint, String password) async {
